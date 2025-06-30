@@ -75,9 +75,9 @@
                 <div id="branch-title-wrapper" class="mb-6 text-center">
                     <!-- Branch title will be inserted here by JavaScript -->
                 </div>
-                <!-- Container for the cards -->
+                <!-- Container for the summary cards -->
                 <div id="app-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
-                    <!-- Cards will be dynamically inserted here -->
+                    <!-- Summary cards will be dynamically inserted here -->
                 </div>
             </div>
         </main>
@@ -86,17 +86,30 @@
     <script>
         // --- Configuration ---
         const SHEET_ID = '1uY5N0Q8ksr2mUT4e0cfqV2xBNTQPAjvS5gq4jjnADWM';
-        const SHEET_NAME = 'สรุปรวม';
-        // !! สำคัญ: ใส่ URL ของ Google Apps Script ที่ Deploy แล้วที่นี่
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxd6sukrTVg1nCzvYxXjDVJT6WK_hLpfLC5g4_1Vo0tDFGifPK6-Ckz5TjDqukji1o/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxd6sukrTVg1nCzvYxXjDVJT6WK_hLpfLC5g4_1Vo0tDFGifPK6-Ckz5TjDqukji1o/exec'; 
+
+        const SUMMARY_SHEET_NAME = 'สรุปรวม';
+        const SUMMARY_CARD_INDICES = [3, 5, 7, 9, 11, 13, 15, 17, 19, 21];
+        const BRANCH_COLUMN_INDEX = 2;
         
-        // Column indices (0-based) for card data and notes
-        const CARD_COLUMN_INDICES = [3, 5, 7, 9, 11, 13, 15, 17, 19, 21]; // D, F, H, ... V
-        const BRANCH_COLUMN_INDEX = 2; // Column C
+        // ---!! การตั้งค่าหลัก !! ---
+        // กำหนดว่าการ์ดคอลัมน์ไหน (จากชีต "สรุปรวม") จะดึงข้อมูลจากชีตรายวันชื่ออะไร
+        // รูปแบบ: { [เลขคอลัมน์ของการ์ด]: 'ชื่อชีตข้อมูลรายวัน' }
+        const DAILY_DATA_SHEET_MAP = {
+            3: 'สลิงผ้า แผนกจัดส่ง',
+            5: 'รถสแตกไฟฟ้า สำหรับรถจัดส่ง',
+            7: 'รถโฟล์คลิฟท์ไฟฟ้า',
+            9: 'รถโฟล์คลิฟท์ประเภทเครื่องยนต์ LPG',
+            11: 'รถจัดส่ง',
+            13: 'รถเฮี๊ยบ',
+            15: 'รถแสตกเกอร์ไฟฟ้า',
+            17: 'เครื่องตัดไฟเบอร์',
+            19: 'เครน โครงสร้าง', 
+            21: 'สลิงผ้า แผนกเหล็ก'
+        };
 
         // --- Global Variables ---
-        let sheetData = [];
-        let headers = [];
+        let allSheetData = {};
 
         // --- DOM Elements ---
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -106,11 +119,6 @@
         const refreshButton = document.getElementById('refreshButton');
         const titleWrapper = document.getElementById('branch-title-wrapper');
 
-        /**
-         * Utility to toggle the spinner on a button.
-         * @param {HTMLButtonElement} button - The button element.
-         * @param {boolean} show - True to show the spinner, false to hide.
-         */
         function toggleButtonSpinner(button, show) {
             const spinnerContainer = button.querySelector('.spinner-container');
             const contentContainer = button.querySelector('.content-container');
@@ -119,72 +127,70 @@
             button.disabled = show;
         }
 
-        /**
-         * Fetches and parses data from the Google Sheet via Google Apps Script proxy.
-         */
         async function fetchAndParseData() {
             loadingOverlay.style.display = 'flex';
             appContainer.innerHTML = '';
             
-            if (APPS_SCRIPT_URL === 'YOUR_DEPLOYED_APPS_SCRIPT_URL_HERE') {
+            if (APPS_SCRIPT_URL.trim() === 'YOUR_DEPLOYED_APPS_SCRIPT_URL_HERE' || APPS_SCRIPT_URL.trim() === '') {
                 loadingText.innerText = 'ข้อผิดพลาดในการตั้งค่า!';
-                appContainer.innerHTML = `<p class="text-red-500 text-center col-span-full">กรุณาตั้งค่า <b>APPS_SCRIPT_URL</b> ในโค้ดก่อนใช้งาน โดยทำตามขั้นตอนที่ให้ไว้</p>`;
+                appContainer.innerHTML = `<p class="text-red-500 text-center col-span-full">กรุณาตั้งค่า <b>APPS_SCRIPT_URL</b> ในโค้ดก่อนใช้งาน</p>`;
                 loadingOverlay.style.display = 'none';
                 return false;
             }
 
             try {
-                // Construct the URL to call the Apps Script
-                const url = `${APPS_SCRIPT_URL}?sheetId=${SHEET_ID}&sheetName=${encodeURIComponent(SHEET_NAME)}`;
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`Network response was not ok: ${response.statusText}`);
-                }
-                const result = await response.json();
+                // Create a list of all unique sheet names needed
+                const sheetNamesToFetch = [SUMMARY_SHEET_NAME, ...Object.values(DAILY_DATA_SHEET_MAP)];
+                const uniqueSheetNames = [...new Set(sheetNamesToFetch)];
 
-                if (result.error) {
-                    throw new Error(result.error);
+                const url = `${APPS_SCRIPT_URL.trim()}?sheetId=${SHEET_ID}&sheetNames=${uniqueSheetNames.map(name => encodeURIComponent(name)).join(',')}`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                
+                allSheetData = await response.json();
+                if (allSheetData.error) throw new Error(allSheetData.error);
+                
+                // Check if any sheet returned an error
+                for (const key in allSheetData) {
+                    if (allSheetData[key].error) {
+                        throw new Error(`Failed to load sheet '${key}': ${allSheetData[key].error}`);
+                    }
                 }
                 
-                if(result.data && result.headers){
-                    headers = result.headers;
-                    sheetData = result.data;
-                    return true;
-                } else {
-                     throw new Error('Invalid data structure returned from Apps Script.');
-                }
+                return true;
+
             } catch (error) {
                 console.error('Error fetching sheet data:', error);
                 loadingText.innerText = 'เกิดข้อผิดพลาด!';
-                appContainer.innerHTML = `<p class="text-red-500 text-center col-span-full">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}<br>กรุณาตรวจสอบว่า Apps Script URL ถูกต้องและ Deploy ถูกต้องหรือไม่</p>`;
+                appContainer.innerHTML = `<p class="text-red-500 text-center col-span-full">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</p>`;
                 return false;
             } finally {
                 loadingOverlay.style.opacity = '0';
                 setTimeout(() => {
                     loadingOverlay.style.display = 'none';
-                    loadingOverlay.style.opacity = '1'; // Reset for next time
+                    loadingOverlay.style.opacity = '1'; 
                 }, 300);
             }
         }
+        
+        function getSummarySheetData() {
+             return allSheetData[SUMMARY_SHEET_NAME]?.allRows.slice(1) || [];
+        }
 
-        /**
-         * Populates the branch filter dropdown with unique branch names and selects the saved one.
-         */
         function populateBranchFilter() {
             branchFilter.innerHTML = '<option value="">-- กรุณาเลือกสาขา --</option>'; 
-            
-            if (sheetData.length === 0) return;
+            const summaryData = getSummarySheetData();
+            if (summaryData.length === 0) return;
 
             const branches = [...new Set(
-                sheetData
+                summaryData
                     .map(row => row[BRANCH_COLUMN_INDEX])
                     .filter(branch => branch && branch.trim() !== '')
             )];
             
             branches.sort((a, b) => a.localeCompare(b, 'th'));
-            
             if (branches.length === 0) {
-                 appContainer.innerHTML = `<p class="text-slate-500 text-center col-span-full">ไม่พบข้อมูลสาขาใน Google Sheet (คอลัมน์ C)</p>`;
+                 appContainer.innerHTML = `<p class="text-slate-500 text-center col-span-full">ไม่พบข้อมูลสาขาในชีต '${SUMMARY_SHEET_NAME}'</p>`;
                  return;
             }
 
@@ -195,63 +201,85 @@
                 branchFilter.appendChild(option);
             });
 
-            // Get the last selected branch from localStorage
             const savedBranch = localStorage.getItem('selectedBranch');
             if (savedBranch) {
-                // Check if the saved branch still exists as an option
                 const optionExists = Array.from(branchFilter.options).some(opt => opt.value === savedBranch);
-                if (optionExists) {
-                    branchFilter.value = savedBranch;
-                }
+                if (optionExists) branchFilter.value = savedBranch;
             }
         }
 
-        /**
-         * Renders cards for the selected branch.
-         * @param {string} selectedBranch - The name of the branch to display.
-         */
-        function renderCardsForBranch(selectedBranch) {
+        function renderAllDataForBranch(selectedBranch) {
             appContainer.innerHTML = ''; 
-            titleWrapper.innerHTML = ''; // Clear previous title
+            titleWrapper.innerHTML = '';
 
             if (!selectedBranch) {
                 appContainer.innerHTML = '<p class="text-slate-500 text-center col-span-full">กรุณาเลือกสาขาเพื่อแสดงข้อมูลการตรวจสอบ</p>';
                 return;
             }
-            
-            // Create and insert the branch title
+
             const titleElement = document.createElement('h2');
             titleElement.className = 'text-3xl font-bold text-slate-800';
             titleElement.textContent = selectedBranch;
             titleWrapper.appendChild(titleElement);
             
-            const dataRow = sheetData.find(row => row[BRANCH_COLUMN_INDEX] === selectedBranch);
-
-            if (!dataRow) {
-                appContainer.innerHTML = `<p class="text-slate-500 text-center col-span-full">ไม่พบข้อมูลสำหรับสาขา "${selectedBranch}"</p>`;
+            const summaryData = getSummarySheetData();
+            const summaryHeaders = allSheetData[SUMMARY_SHEET_NAME]?.allRows[0] || [];
+            const summaryDataRow = summaryData.find(row => row[BRANCH_COLUMN_INDEX] === selectedBranch);
+            
+            if (!summaryDataRow) {
+                appContainer.innerHTML = `<p class="text-slate-500 text-center col-span-full">ไม่พบข้อมูลสรุปสำหรับสาขา "${selectedBranch}"</p>`;
                 return;
             }
             
-            CARD_COLUMN_INDICES.forEach(colIndex => {
-                if (colIndex >= dataRow.length) return;
+            SUMMARY_CARD_INDICES.forEach(colIndex => {
+                if (colIndex >= summaryDataRow.length) return;
                 
-                const title = headers[colIndex] || `ข้อมูล #${colIndex+1}`;
-                const checkValue = dataRow[colIndex] || 'N/A';
-                const noteValue = (dataRow.length > colIndex + 1) ? dataRow[colIndex + 1] : '-';
+                const title = summaryHeaders[colIndex] || `ข้อมูล #${colIndex+1}`;
+                const checkValue = summaryDataRow[colIndex] || 'N/A';
                 
+                // Get the standard note from the adjacent column in "สรุปรวม"
+                const standardNoteValue = (summaryDataRow.length > colIndex + 1) ? summaryDataRow[colIndex + 1] : '-';
+                
+                let dailyDataHtml = '';
+                const dailyDataSheetName = DAILY_DATA_SHEET_MAP[colIndex];
+                
+                // Check if this card needs to display daily data
+                if (dailyDataSheetName && allSheetData[dailyDataSheetName]) {
+                    const dailySheetAllRows = allSheetData[dailyDataSheetName].allRows;
+                    const dailySheetData = dailySheetAllRows.slice(2); // Data starts from row 3
+                    const dailyBranchRow = dailySheetData.find(row => row[0] === selectedBranch);
+
+                    if (dailyBranchRow) {
+                        const currentDay = new Date().getDate();
+                        const dailyDataColIndex = currentDay + 1; // Day 1 -> Col C (idx 2), so Day X -> index X+1
+                        
+                        if (dailyBranchRow.length > dailyDataColIndex) {
+                            const dailyData = dailyBranchRow[dailyDataColIndex] || 'N/A';
+                            dailyDataHtml = `
+                                <div>
+                                    <p class="font-semibold text-slate-600">ข้อมูลประจำวันที่ ${currentDay}:</p>
+                                    <p class="font-bold text-slate-800">${dailyData}</p>
+                                </div>`;
+                        } else {
+                            dailyDataHtml = `<div><p class="font-semibold text-slate-600">ข้อมูลประจำวัน:</p><p class="text-sm text-red-500">ไม่พบข้อมูล</p></div>`;
+                        }
+                    } else {
+                        dailyDataHtml = `<div><p class="font-semibold text-slate-600">ข้อมูลประจำวัน:</p><p class="text-sm text-red-500">ไม่พบสาขา</p></div>`;
+                    }
+                }
+                
+                // Card coloring logic
                 let cardColorClasses = 'bg-white/90 border-slate-200';
                 let valueColor = 'text-indigo-700';
-                
                 const trimmedCheckValue = checkValue.trim();
                 const lowerCheckValue = trimmedCheckValue.toLowerCase();
 
-                // Check for Thai and English terms to set colors
                 if (lowerCheckValue === 'ok' || trimmedCheckValue === 'ครบ') {
                     cardColorClasses = 'bg-teal-50/90 border-teal-200';
-                    valueColor = 'text-green-600'; // Green text for complete/ok
+                    valueColor = 'text-green-600';
                 } else if (lowerCheckValue === 'no' || trimmedCheckValue === 'ไม่ครบ') {
                      cardColorClasses = 'bg-rose-50/90 border-rose-200';
-                     valueColor = 'text-red-600'; // Red text for incomplete/no
+                     valueColor = 'text-red-600';
                 }
 
                 const cardHtml = `
@@ -260,20 +288,22 @@
                         <div class="flex-grow flex flex-col items-center justify-center bg-white/50 rounded-lg p-4 mb-4">
                             <p class="text-3xl font-bold ${valueColor} break-all">${checkValue}</p>
                         </div>
-                        <div class="mt-auto border-t border-slate-200 pt-3">
-                            <p class="text-sm font-semibold text-slate-600">หมายเหตุ:</p>
-                            <p class="text-slate-700 break-words">${noteValue}</p>
-                        </div>
-                    </div>
-                `;
+                        <div class="mt-auto border-t border-slate-200 pt-3 space-y-3 text-sm">
+                            
+                            <!-- Daily Data (will only render if dailyDataHtml is not empty) -->
+                            ${dailyDataHtml}
 
+                            <!-- Standard Note -->
+                            <div>
+                                <p class="font-semibold text-slate-600">หมายเหตุ:</p>
+                                <p class="text-slate-700 break-words">${standardNoteValue}</p>
+                            </div>
+                        </div>
+                    </div>`;
                 appContainer.insertAdjacentHTML('beforeend', cardHtml);
             });
         }
-        
-        /**
-         * Main initialization function for the application.
-         */
+
         async function initializeApp() {
             toggleButtonSpinner(refreshButton, true);
             loadingText.innerText = 'กำลังโหลดข้อมูล...';
@@ -281,18 +311,16 @@
             if (success) {
                 populateBranchFilter();
                 const selectedBranch = branchFilter.value;
-                renderCardsForBranch(selectedBranch);
+                renderAllDataForBranch(selectedBranch);
             }
             toggleButtonSpinner(refreshButton, false);
         }
 
-        // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', initializeApp);
         refreshButton.addEventListener('click', initializeApp);
         branchFilter.addEventListener('change', (event) => {
-            // Save the selected branch to localStorage
             localStorage.setItem('selectedBranch', event.target.value);
-            renderCardsForBranch(event.target.value);
+            renderAllDataForBranch(event.target.value);
         });
 
     </script>
