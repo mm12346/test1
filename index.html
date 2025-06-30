@@ -52,27 +52,31 @@
     <div id="main-app">
         <header class="sticky top-0 z-10 w-full bg-white/95 backdrop-blur-sm border-b border-slate-200">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="py-4 flex flex-col sm:flex-row flex-wrap gap-4 items-center">
+                <div class="py-4 flex flex-wrap gap-4 items-center justify-between">
                     <div class="flex items-center space-x-2">
                         <svg class="w-8 h-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         <h1 class="text-xl font-bold text-slate-800">Online Checker</h1>
                     </div>
-                    <!-- Branch Filter Dropdown -->
-                    <div class="flex-grow w-full sm:w-auto">
-                        <select id="branchFilter" class="w-full px-4 py-2 bg-slate-100 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition">
-                            <option value="">-- กรุณาเลือกสาขา --</option>
-                        </select>
-                    </div>
-                    <div class="flex gap-2 sm:gap-3 flex-wrap justify-center">
+                    
+                    <!-- Container for filter and refresh button -->
+                    <div class="w-full sm:w-auto flex items-center gap-2">
+                        <!-- Branch Filter Dropdown -->
+                        <div class="flex-grow">
+                            <select id="branchFilter" class="w-full px-4 py-2 bg-slate-100 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition">
+                                <option value="">-- กรุณาเลือกสาขา --</option>
+                            </select>
+                        </div>
                         <!-- Refresh Button -->
-                        <button id="refreshButton" class="relative p-3 bg-slate-200 text-slate-700 font-semibold rounded-full shadow-sm hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition flex items-center justify-center disabled:opacity-50">
-                            <div class="spinner-container hidden absolute inset-0 flex items-center justify-center">
-                                <svg class="animate-spin h-5 w-5 text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            </div>
-                            <div class="content-container">
-                                 <svg class="icon h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
-                            </div>
-                        </button>
+                        <div class="flex-shrink-0">
+                            <button id="refreshButton" class="relative p-3 bg-slate-200 text-slate-700 font-semibold rounded-full shadow-sm hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition flex items-center justify-center disabled:opacity-50">
+                                <div class="spinner-container hidden absolute inset-0 flex items-center justify-center">
+                                    <svg class="animate-spin h-5 w-5 text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                </div>
+                                <div class="content-container">
+                                     <svg class="icon h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+                                </div>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -162,7 +166,10 @@
                 const uniqueSheetNames = [...new Set(sheetNamesToFetch)];
 
                 const url = `${scriptUrl.trim()}?sheetId=${SHEET_ID}&sheetNames=${uniqueSheetNames.map(name => encodeURIComponent(name)).join(',')}`;
-                const response = await fetch(url);
+                
+                // Fetch data with cache disabled to ensure freshness
+                const response = await fetch(url, { cache: 'no-store' });
+                
                 if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                 
                 allSheetData = await response.json();
