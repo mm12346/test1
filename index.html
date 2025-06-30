@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Checker</title>
+    
+    <!-- PWA Manifest and Theme -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/mm12346/test1/refs/heads/main/requirements(2).png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Online Checker">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -86,7 +95,13 @@
     <script>
         // --- Configuration ---
         const SHEET_ID = '1uY5N0Q8ksr2mUT4e0cfqV2xBNTQPAjvS5gq4jjnADWM';
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxd6sukrTVg1nCzvYxXjDVJT6WK_hLpfLC5g4_1Vo0tDFGifPK6-Ckz5TjDqukji1o/exec'; 
+        
+        // ---!! เพิ่ม URL ของ Apps Script หลายบัญชีที่นี่ !! ---
+        const APPS_SCRIPT_URLS = [
+            'https://script.google.com/macros/s/AKfycbxd6sukrTVg1nCzvYxXjDVJT6WK_hLpfLC5g4_1Vo0tDFGifPK6-Ckz5TjDqukji1o/exec',
+            // 'https://script.google.com/macros/s/URL_BUNCHI_SOOONG/exec', 
+            // 'https://script.google.com/macros/s/URL_BUNCHI_SAAM/exec'
+        ];
 
         const SUMMARY_SHEET_NAME = 'สรุปรวม';
         const SUMMARY_CARD_INDICES = [3, 5, 7, 9, 11, 13, 15, 17, 19, 21];
@@ -131,9 +146,12 @@
             loadingOverlay.style.display = 'flex';
             appContainer.innerHTML = '';
             
-            if (APPS_SCRIPT_URL.trim() === 'YOUR_DEPLOYED_APPS_SCRIPT_URL_HERE' || APPS_SCRIPT_URL.trim() === '') {
+            // Randomly select a URL from the array
+            const scriptUrl = APPS_SCRIPT_URLS[Math.floor(Math.random() * APPS_SCRIPT_URLS.length)];
+
+            if (!scriptUrl || scriptUrl.trim() === '' || scriptUrl.includes("YOUR_URL_HERE")) {
                 loadingText.innerText = 'ข้อผิดพลาดในการตั้งค่า!';
-                appContainer.innerHTML = `<p class="text-red-500 text-center col-span-full">กรุณาตั้งค่า <b>APPS_SCRIPT_URL</b> ในโค้ดก่อนใช้งาน</p>`;
+                appContainer.innerHTML = `<p class="text-red-500 text-center col-span-full">กรุณาตั้งค่า <b>APPS_SCRIPT_URLS</b> ในโค้ดอย่างน้อยหนึ่ง URL</p>`;
                 loadingOverlay.style.display = 'none';
                 return false;
             }
@@ -143,7 +161,7 @@
                 const sheetNamesToFetch = [SUMMARY_SHEET_NAME, ...Object.values(DAILY_DATA_SHEET_MAP)];
                 const uniqueSheetNames = [...new Set(sheetNamesToFetch)];
 
-                const url = `${APPS_SCRIPT_URL.trim()}?sheetId=${SHEET_ID}&sheetNames=${uniqueSheetNames.map(name => encodeURIComponent(name)).join(',')}`;
+                const url = `${scriptUrl.trim()}?sheetId=${SHEET_ID}&sheetNames=${uniqueSheetNames.map(name => encodeURIComponent(name)).join(',')}`;
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                 
@@ -316,7 +334,21 @@
             toggleButtonSpinner(refreshButton, false);
         }
 
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+            
+            // Register the service worker for PWA functionality
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js').then(registration => {
+                  console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }).catch(err => {
+                  console.log('ServiceWorker registration failed: ', err);
+                });
+              });
+            }
+        });
+        
         refreshButton.addEventListener('click', initializeApp);
         branchFilter.addEventListener('change', (event) => {
             localStorage.setItem('selectedBranch', event.target.value);
