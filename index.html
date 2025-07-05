@@ -2,366 +2,480 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Updated viewport to prevent zooming -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Online Checker</title>
-    
-    <!-- PWA Manifest and Theme -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4f46e5">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/mm12346/test1/refs/heads/main/requirements(2).png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Online Checker">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
     
+    <!-- PWA Manifest & Theme for Admin -->
+    <link rel="manifest" href="admin-manifest.json">
+    <meta name="theme-color" content="#4338ca">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/mm12346/test1/refs/heads/main/requirements(2).png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Admin Checker">
+    
     <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f1f5f9; }
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background-color: #f1f5f9; 
+        }
+        /* When the body has this class, it prevents scrolling */
+        body.overflow-hidden {
+            overflow: hidden;
+        }
+        .loader-sm { width: 20px; height: 20px; }
         .loader-lg { width: 48px; height: 48px; }
-        .invisible { visibility: hidden; }
-        /* Style for loading overlay */
-        #loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.3s;
+        
+        /* --- Hide all scrollbars --- */
+        /* For Webkit browsers (Chrome, Safari) */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        /* For IE, Edge, and Firefox */
+        * {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
     </style>
 </head>
 <body class="bg-slate-100">
 
-    <!-- Loading Overlay -->
-    <div id="loading-overlay">
-        <div class="flex flex-col items-center">
-            <div class="loader-lg animate-spin rounded-full border-4 border-slate-200 border-t-indigo-500"></div>
-            <p id="loading-text" class="mt-4 text-slate-700 font-semibold">กำลังโหลดข้อมูล...</p>
+    <!-- Main Menu Page (New) -->
+    <div id="main-menu" class="flex flex-col items-center justify-center min-h-screen bg-slate-100 p-4">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-indigo-600">Online Checker</h1>
+            <p class="text-slate-500 mt-2">โปรแกรมตรวจสอบข้อมูลออนไลน์</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-4xl">
+            <!-- Menu Item 1: Daily Check -->
+            <a href="#" id="menu-daily-check" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center">
+                <div class="bg-indigo-100 text-indigo-600 rounded-full p-4 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </div>
+                <h2 class="text-xl font-semibold text-slate-800">ตรวจสอบรายวัน</h2>
+                <p class="text-sm text-slate-500 mt-1">เข้าสู่หน้าตรวจสอบข้อมูลประจำวัน</p>
+            </a>
+            <!-- Menu Item 2: Details -->
+            <a href="#" id="menu-details" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center opacity-60 cursor-not-allowed">
+                <div class="bg-sky-100 text-sky-600 rounded-full p-4 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                </div>
+                <h2 class="text-xl font-semibold text-slate-800">รายละเอียดการตรวจสอบ</h2>
+                <p class="text-sm text-slate-500 mt-1">เร็วๆ นี้</p>
+            </a>
+            <!-- Menu Item 3: Summary -->
+            <a href="#" id="menu-summary" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center opacity-60 cursor-not-allowed">
+                <div class="bg-amber-100 text-amber-600 rounded-full p-4 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                </div>
+                <h2 class="text-xl font-semibold text-slate-800">สรุปตรวจประจำเดือน</h2>
+                <p class="text-sm text-slate-500 mt-1">เร็วๆ นี้</p>
+            </a>
+            <!-- Menu Item 4: Others -->
+            <a href="#" id="menu-other" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center opacity-60 cursor-not-allowed">
+                <div class="bg-slate-100 text-slate-600 rounded-full p-4 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </div>
+                <h2 class="text-xl font-semibold text-slate-800">เมนูอื่นๆ</h2>
+                <p class="text-sm text-slate-500 mt-1">เร็วๆ นี้</p>
+            </a>
         </div>
     </div>
 
-    <!-- Main App Screen -->
-    <div id="main-app">
-        <header class="sticky top-0 z-10 w-full bg-white/95 backdrop-blur-sm border-b border-slate-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="py-4 flex flex-wrap gap-4 items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <svg class="w-8 h-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <h1 class="text-xl font-bold text-slate-800">Online Checker</h1>
-                    </div>
-                    
-                    <!-- Container for filter and refresh button -->
-                    <div class="w-full sm:w-auto flex items-center gap-2">
-                        <!-- Branch Filter Dropdown -->
-                        <div class="flex-grow">
-                            <select id="branchFilter" class="w-full px-4 py-2 bg-slate-100 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition">
-                                <option value="">-- กรุณาเลือกสาขา --</option>
-                            </select>
-                        </div>
-                        <!-- Refresh Button -->
-                        <div class="flex-shrink-0">
-                            <button id="refreshButton" class="relative p-3 bg-slate-200 text-slate-700 font-semibold rounded-full shadow-sm hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition flex items-center justify-center disabled:opacity-50">
-                                <div class="spinner-container hidden absolute inset-0 flex items-center justify-center">
-                                    <svg class="animate-spin h-5 w-5 text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                </div>
-                                <div class="content-container">
-                                     <svg class="icon h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
-                                </div>
+    <!-- Main Application Page (Wrapped and hidden by default) -->
+    <div id="main-app-container" class="hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+            <div class="flex items-center justify-center p-4 border-b border-slate-200">
+                 <svg class="w-8 h-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Zm3.75 11.625a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg>
+                 <h1 class="text-xl font-bold text-slate-800 ml-2">Menu</h1>
+            </div>
+            <div class="p-4">
+                <h2 class="text-lg font-semibold text-slate-700 mb-4">เลือกสาขา</h2>
+                <div class="mb-4">
+                    <input type="text" id="user-search-input" placeholder="ค้นหาสาขา..." class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                </div>
+                <div id="user-buttons-container" class="flex flex-col space-y-2 overflow-y-auto h-[calc(100vh-210px)]">
+                    <!-- User buttons will be inserted here -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Overlay for mobile -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+
+        <!-- Main Content -->
+        <div class="lg:ml-64 transition-all duration-300 ease-in-out">
+            <header class="sticky top-0 z-20 w-full bg-white/95 backdrop-blur-sm border-b border-slate-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="py-4 flex items-center justify-between gap-4">
+                        <!-- Back to Menu Button -->
+                        <button id="back-to-menu-button" title="กลับไปหน้าเมนูหลัก" class="p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-700 rounded-full transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m8-8l-8 8 8 8" />
+                            </svg>
+                        </button>
+
+                        <!-- Hamburger button for mobile -->
+                        <button id="sidebar-toggle" class="lg:hidden text-slate-500 hover:text-slate-700">
+                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                            </svg>
+                        </button>
+                        
+                        <div class="flex-grow flex items-center justify-end gap-4">
+                            <input type="date" id="globalCheckDate" class="w-full max-w-xs px-4 py-2 bg-slate-100 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition">
+                            <button id="refresh-button" title="รีเฟรชข้อมูล" class="p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-700 rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                                    <path d="M21 3v5h-5"></path>
+                                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                                    <path d="M3 21v-5h5"></path>
+                                </svg>
                             </button>
                         </div>
                     </div>
                 </div>
-            </div>
-        </header>
-        <main>
-            <!-- Main Content Container -->
-            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-                <!-- Wrapper for the dynamic branch title -->
-                <div id="branch-title-wrapper" class="mb-6 text-center">
-                    <!-- Branch title will be inserted here by JavaScript -->
+            </header>
+
+            <main>
+                <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+                    <div id="user-info" class="hidden">
+                         <h3 class="text-2xl font-bold text-slate-800 mb-4" id="current-user-header"></h3>
+                         <div id="app-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            <!-- Cards will be inserted here -->
+                        </div>
+                    </div>
+                     <div id="welcome-message" class="text-center py-12">
+                        <svg class="w-16 h-16 mx-auto text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                        <h2 class="mt-4 text-2xl font-semibold text-slate-700">ยินดีต้อนรับ</h2>
+                        <p class="mt-2 text-slate-500">กรุณาเลือกผู้ใช้งานจากเมนูด้านข้างเพื่อดูข้อมูล</p>
+                    </div>
                 </div>
-                <!-- Container for the summary cards -->
-                <div id="app-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
-                    <!-- Summary cards will be dynamically inserted here -->
-                </div>
-            </div>
-        </main>
+            </main>
+        </div>
     </div>
+
 
     <script>
         // --- Configuration ---
-        const SHEET_ID = '1uY5N0Q8ksr2mUT4e0cfqV2xBNTQPAjvS5gq4jjnADWM';
-        
-        // ---!! เพิ่ม URL ของ Apps Script หลายบัญชีที่นี่ !! ---
-        const APPS_SCRIPT_URLS = [
-            'https://script.google.com/macros/s/AKfycbxd6sukrTVg1nCzvYxXjDVJT6WK_hLpfLC5g4_1Vo0tDFGifPK6-Ckz5TjDqukji1o/exec',
-            // 'https://script.google.com/macros/s/URL_BUNCHI_SOOONG/exec', 
-            // 'https://script.google.com/macros/s/URL_BUNCHI_SAAM/exec'
+        const SCRIPT_URLS = [
+            'https://script.google.com/macros/s/AKfycbwsKgINhyiziRXNHyLVGjox-AoOYn4n1Iwz0vnLrX0tK26YGLGT0UOfzJfBU1fGbAlf/exec',//API_1
+            'https://script.google.com/macros/s/AKfycbyY8StXDzPsEHHHb9Y7qmTQH_fUknJ7bQVpS_qTqkRbaO7iszWwrdGObLcYBdwx5mTq/exec',//API_2
+            'https://script.google.com/macros/s/AKfycbweG-pW-j5DQJc2Bf27zE-l6xpdnZS_z19MqClc0-POdxoKtwH_hbA86NjkKpnk6Zgp/exec',//API_3
+            'https://script.google.com/macros/s/AKfycbxgPHFAoISxt0bzwY9JjwhJShKTf7IuHy3qCrLjl5xqXKIB8y1pQazaTIm0EKhw7xHW/exec',//API_4
+            'https://script.google.com/macros/s/AKfycbzaukac9i4eXChJdU51UiqgXWHZ1BAZvxc1uwMl-63fYDfwavE636zRBlhZhrxpqP1x/exec'//API_5
         ];
-
-        const SUMMARY_SHEET_NAME = 'สรุปรวม';
-        const SUMMARY_CARD_INDICES = [3, 5, 7, 9, 11, 13, 15, 17, 19, 21];
-        const BRANCH_COLUMN_INDEX = 2;
-        
-        // ---!! การตั้งค่าหลัก !! ---
-        // กำหนดว่าการ์ดคอลัมน์ไหน (จากชีต "สรุปรวม") จะดึงข้อมูลจากชีตรายวันชื่ออะไร
-        // รูปแบบ: { [เลขคอลัมน์ของการ์ด]: 'ชื่อชีตข้อมูลรายวัน' }
-        const DAILY_DATA_SHEET_MAP = {
-            3: 'สลิงผ้า แผนกจัดส่ง',
-            5: 'รถสแตกไฟฟ้า สำหรับรถจัดส่ง',
-            7: 'รถโฟล์คลิฟท์ไฟฟ้า',
-            9: 'รถโฟล์คลิฟท์ประเภทเครื่องยนต์ LPG',
-            11: 'รถจัดส่ง',
-            13: 'รถเฮี๊ยบ',
-            15: 'รถแสตกเกอร์ไฟฟ้า',
-            17: 'เครื่องตัดไฟเบอร์',
-            19: 'เครน โครงสร้าง', 
-            21: 'สลิงผ้า แผนกเหล็ก'
-        };
-
-        // --- Global Variables ---
-        let allSheetData = {};
+        let cardConfigurations = [];
+        const dataCache = {};
 
         // --- DOM Elements ---
-        const loadingOverlay = document.getElementById('loading-overlay');
-        const loadingText = document.getElementById('loading-text');
+        const mainMenu = document.getElementById('main-menu');
+        const mainAppContainer = document.getElementById('main-app-container');
+        
+        const userButtonsContainer = document.getElementById('user-buttons-container');
+        const userInfo = document.getElementById('user-info');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const currentUserHeader = document.getElementById('current-user-header');
         const appContainer = document.getElementById('app-container');
-        const branchFilter = document.getElementById('branchFilter');
-        const refreshButton = document.getElementById('refreshButton');
-        const titleWrapper = document.getElementById('branch-title-wrapper');
+        const globalCheckDateInput = document.getElementById('globalCheckDate');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const refreshButton = document.getElementById('refresh-button');
+        const userSearchInput = document.getElementById('user-search-input');
+        const backToMenuButton = document.getElementById('back-to-menu-button');
 
-        function toggleButtonSpinner(button, show) {
-            const spinnerContainer = button.querySelector('.spinner-container');
-            const contentContainer = button.querySelector('.content-container');
-            if (spinnerContainer) spinnerContainer.classList.toggle('hidden', !show);
-            if (contentContainer) contentContainer.classList.toggle('invisible', show);
-            button.disabled = show;
+        // --- Menu Elements ---
+        const menuDailyCheck = document.getElementById('menu-daily-check');
+        const menuDetails = document.getElementById('menu-details');
+        const menuSummary = document.getElementById('menu-summary');
+        const menuOther = document.getElementById('menu-other');
+
+        // --- View Switching Logic ---
+        function showMainApp() {
+            mainMenu.classList.add('hidden');
+            mainAppContainer.classList.remove('hidden');
         }
 
-        async function fetchAndParseData() {
-            loadingOverlay.style.display = 'flex';
-            appContainer.innerHTML = '';
-            
-            // Randomly select a URL from the array
-            const scriptUrl = APPS_SCRIPT_URLS[Math.floor(Math.random() * APPS_SCRIPT_URLS.length)];
+        function showMainMenu() {
+            mainMenu.classList.remove('hidden');
+            mainAppContainer.classList.add('hidden');
+        }
 
-            if (!scriptUrl || scriptUrl.trim() === '' || scriptUrl.includes("YOUR_URL_HERE")) {
-                loadingText.innerText = 'ข้อผิดพลาดในการตั้งค่า!';
-                appContainer.innerHTML = `<p class="text-red-500 text-center col-span-full">กรุณาตั้งค่า <b>APPS_SCRIPT_URLS</b> ในโค้ดอย่างน้อยหนึ่ง URL</p>`;
-                loadingOverlay.style.display = 'none';
-                return false;
+        // --- Sidebar Logic ---
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            sidebarOverlay.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        sidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (sidebar.classList.contains('-translate-x-full')) {
+                openSidebar();
+            } else {
+                closeSidebar();
             }
+        });
 
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+
+        // --- Utility ---
+        let currentUrlIndex = 0;
+        function getScriptUrl() {
+            const url = SCRIPT_URLS[currentUrlIndex];
+            currentUrlIndex = (currentUrlIndex + 1) % SCRIPT_URLS.length;
+            return url;
+        }
+
+        async function apiCall(action, payload = {}) {
+            const isGet = action.startsWith('load') || action.startsWith('get');
+            const options = { method: isGet ? 'GET' : 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' } };
+            const scriptUrl = getScriptUrl();
+            const url = new URL(scriptUrl);
+
+            if (isGet) {
+                Object.entries({ action, ...payload }).forEach(([key, value]) => url.searchParams.append(key, value));
+            } else {
+                options.body = JSON.stringify({ action, ...payload });
+            }
+            const res = await fetch(url, options);
+            if (!res.ok) throw new Error(`Network error: ${res.statusText}`);
+            const result = await res.json();
+            if (result.error || result.success === false) throw new Error(result.error || 'Unknown API error');
+            return result;
+        }
+
+        async function loadAllUsers() {
+            userButtonsContainer.innerHTML = `<div class="loader-sm animate-spin rounded-full border-2 border-slate-300 border-t-indigo-500 mx-auto"></div>`;
             try {
-                // Create a list of all unique sheet names needed
-                const sheetNamesToFetch = [SUMMARY_SHEET_NAME, ...Object.values(DAILY_DATA_SHEET_MAP)];
-                const uniqueSheetNames = [...new Set(sheetNamesToFetch)];
-
-                const url = `${scriptUrl.trim()}?sheetId=${SHEET_ID}&sheetNames=${uniqueSheetNames.map(name => encodeURIComponent(name)).join(',')}`;
-                
-                // Fetch data with cache disabled to ensure freshness
-                const response = await fetch(url, { cache: 'no-store' });
-                
-                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                
-                allSheetData = await response.json();
-                if (allSheetData.error) throw new Error(allSheetData.error);
-                
-                // Check if any sheet returned an error
-                for (const key in allSheetData) {
-                    if (allSheetData[key].error) {
-                        throw new Error(`Failed to load sheet '${key}': ${allSheetData[key].error}`);
-                    }
-                }
-                
-                return true;
-
-            } catch (error) {
-                console.error('Error fetching sheet data:', error);
-                loadingText.innerText = 'เกิดข้อผิดพลาด!';
-                appContainer.innerHTML = `<p class="text-red-500 text-center col-span-full">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</p>`;
-                return false;
-            } finally {
-                loadingOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    loadingOverlay.style.display = 'none';
-                    loadingOverlay.style.opacity = '1'; 
-                }, 300);
-            }
-        }
-        
-        function getSummarySheetData() {
-             return allSheetData[SUMMARY_SHEET_NAME]?.allRows.slice(1) || [];
-        }
-
-        function populateBranchFilter() {
-            branchFilter.innerHTML = '<option value="">-- กรุณาเลือกสาขา --</option>'; 
-            const summaryData = getSummarySheetData();
-            if (summaryData.length === 0) return;
-
-            const branches = [...new Set(
-                summaryData
-                    .map(row => row[BRANCH_COLUMN_INDEX])
-                    .filter(branch => branch && branch.trim() !== '')
-            )];
-            
-            branches.sort((a, b) => a.localeCompare(b, 'th'));
-            if (branches.length === 0) {
-                 appContainer.innerHTML = `<p class="text-slate-500 text-center col-span-full">ไม่พบข้อมูลสาขาในชีต '${SUMMARY_SHEET_NAME}'</p>`;
-                 return;
-            }
-
-            branches.forEach(branch => {
-                const option = document.createElement('option');
-                option.value = branch;
-                option.textContent = branch;
-                branchFilter.appendChild(option);
-            });
-
-            const savedBranch = localStorage.getItem('selectedBranch');
-            if (savedBranch) {
-                const optionExists = Array.from(branchFilter.options).some(opt => opt.value === savedBranch);
-                if (optionExists) branchFilter.value = savedBranch;
-            }
-        }
-
-        function renderAllDataForBranch(selectedBranch) {
-            appContainer.innerHTML = ''; 
-            titleWrapper.innerHTML = '';
-
-            if (!selectedBranch) {
-                appContainer.innerHTML = '<p class="text-slate-500 text-center col-span-full">กรุณาเลือกสาขาเพื่อแสดงข้อมูลการตรวจสอบ</p>';
-                return;
-            }
-
-            const titleElement = document.createElement('h2');
-            titleElement.className = 'text-3xl font-bold text-slate-800';
-            titleElement.textContent = selectedBranch;
-            titleWrapper.appendChild(titleElement);
-            
-            const summaryData = getSummarySheetData();
-            const summaryHeaders = allSheetData[SUMMARY_SHEET_NAME]?.allRows[0] || [];
-            const summaryDataRow = summaryData.find(row => row[BRANCH_COLUMN_INDEX] === selectedBranch);
-            
-            if (!summaryDataRow) {
-                appContainer.innerHTML = `<p class="text-slate-500 text-center col-span-full">ไม่พบข้อมูลสรุปสำหรับสาขา "${selectedBranch}"</p>`;
-                return;
-            }
-            
-            SUMMARY_CARD_INDICES.forEach(colIndex => {
-                if (colIndex >= summaryDataRow.length) return;
-                
-                const title = summaryHeaders[colIndex] || `ข้อมูล #${colIndex+1}`;
-                const checkValue = summaryDataRow[colIndex] || 'N/A';
-                
-                // Get the standard note from the adjacent column in "สรุปรวม"
-                const standardNoteValue = (summaryDataRow.length > colIndex + 1) ? summaryDataRow[colIndex + 1] : '-';
-                
-                let dailyDataHtml = '';
-                const dailyDataSheetName = DAILY_DATA_SHEET_MAP[colIndex];
-                
-                // Check if this card needs to display daily data
-                if (dailyDataSheetName && allSheetData[dailyDataSheetName]) {
-                    const dailySheetAllRows = allSheetData[dailyDataSheetName].allRows;
-                    const dailySheetData = dailySheetAllRows.slice(2); // Data starts from row 3
-                    const dailyBranchRow = dailySheetData.find(row => row[0] === selectedBranch);
-
-                    if (dailyBranchRow) {
-                        const currentDay = new Date().getDate();
-                        const dailyDataColIndex = currentDay + 1; // Day 1 -> Col C (idx 2), so Day X -> index X+1
+                const result = await apiCall('getAllUsers');
+                const users = result.users || [];
+                userButtonsContainer.innerHTML = '';
+                users.forEach(user => {
+                    const button = document.createElement('button');
+                    button.textContent = user;
+                    button.className = 'w-full text-left px-4 py-2 bg-white border border-transparent rounded-lg hover:bg-indigo-50 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition block';
+                    button.onclick = () => {
+                        document.querySelectorAll('#user-buttons-container button').forEach(btn => btn.classList.remove('bg-indigo-600', 'text-white', 'font-semibold', 'shadow'));
+                        button.classList.add('bg-indigo-600', 'text-white', 'font-semibold', 'shadow');
                         
-                        if (dailyBranchRow.length > dailyDataColIndex) {
-                            const dailyData = dailyBranchRow[dailyDataColIndex] || 'N/A';
-                            dailyDataHtml = `
-                                <div>
-                                    <p class="font-semibold text-slate-600">ข้อมูลประจำวันที่ ${currentDay}:</p>
-                                    <p class="font-bold text-slate-800">${dailyData}</p>
-                                </div>`;
-                        } else {
-                            dailyDataHtml = `<div><p class="font-semibold text-slate-600">ข้อมูลประจำวัน:</p><p class="text-sm text-red-500">ไม่พบข้อมูล</p></div>`;
+                        localStorage.setItem('lastSelectedUser', user);
+
+                        displayUserCards(user);
+                        if (window.innerWidth < 1024) {
+                            closeSidebar();
                         }
-                    } else {
-                        dailyDataHtml = `<div><p class="font-semibold text-slate-600">ข้อมูลประจำวัน:</p><p class="text-sm text-red-500">ไม่พบสาขา</p></div>`;
-                    }
-                }
-                
-                // Card coloring logic
-                let cardColorClasses = 'bg-white/90 border-slate-200';
-                let valueColor = 'text-indigo-700';
-                const trimmedCheckValue = checkValue.trim();
-                const lowerCheckValue = trimmedCheckValue.toLowerCase();
-
-                if (lowerCheckValue === 'ok' || trimmedCheckValue === 'ครบ') {
-                    cardColorClasses = 'bg-teal-50/90 border-teal-200';
-                    valueColor = 'text-green-600';
-                } else if (lowerCheckValue === 'no' || trimmedCheckValue === 'ไม่ครบ') {
-                     cardColorClasses = 'bg-rose-50/90 border-rose-200';
-                     valueColor = 'text-red-600';
-                }
-
-                const cardHtml = `
-                    <div class="border rounded-2xl shadow-lg p-6 flex flex-col h-full ${cardColorClasses} backdrop-blur-sm transition-all duration-300">
-                        <h2 class="text-xl font-bold text-slate-800 mb-3 text-center truncate" title="${title}">${title}</h2>
-                        <div class="flex-grow flex flex-col items-center justify-center bg-white/50 rounded-lg p-4 mb-4">
-                            <p class="text-3xl font-bold ${valueColor} break-all">${checkValue}</p>
-                        </div>
-                        <div class="mt-auto border-t border-slate-200 pt-3 space-y-3 text-sm">
-                            
-                            <!-- Daily Data (will only render if dailyDataHtml is not empty) -->
-                            ${dailyDataHtml}
-
-                            <!-- Standard Note -->
-                            <div>
-                                <p class="font-semibold text-slate-600">หมายเหตุ:</p>
-                                <p class="text-slate-700 break-words">${standardNoteValue}</p>
-                            </div>
-                        </div>
-                    </div>`;
-                appContainer.insertAdjacentHTML('beforeend', cardHtml);
-            });
-        }
-
-        async function initializeApp() {
-            toggleButtonSpinner(refreshButton, true);
-            loadingText.innerText = 'กำลังโหลดข้อมูล...';
-            const success = await fetchAndParseData();
-            if (success) {
-                populateBranchFilter();
-                const selectedBranch = branchFilter.value;
-                renderAllDataForBranch(selectedBranch);
-            }
-            toggleButtonSpinner(refreshButton, false);
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeApp();
-            
-            // Register the service worker for PWA functionality
-            if ('serviceWorker' in navigator) {
-              window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js').then(registration => {
-                  console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }).catch(err => {
-                  console.log('ServiceWorker registration failed: ', err);
+                    };
+                    userButtonsContainer.appendChild(button);
                 });
-              });
+            } catch (error) {
+                userButtonsContainer.innerHTML = `<p class="text-red-500">เกิดข้อผิดพลาดในการโหลดรายชื่อผู้ใช้: ${error.message}</p>`;
             }
-        });
+        }
         
-        refreshButton.addEventListener('click', initializeApp);
-        branchFilter.addEventListener('change', (event) => {
-            localStorage.setItem('selectedBranch', event.target.value);
-            renderAllDataForBranch(event.target.value);
-        });
+        async function displayUserCards(username) {
+            userInfo.classList.remove('hidden');
+            welcomeMessage.classList.add('hidden');
+            currentUserHeader.textContent = `ข้อมูลของ: ${username}`;
+            appContainer.innerHTML = `<div class="loader-lg col-span-full mx-auto animate-spin rounded-full border-4 border-slate-200 border-t-indigo-500"></div>`;
+            try {
+                const result = await apiCall('loadSettings', { username });
+                cardConfigurations = Array.isArray(result.config) ? result.config : [];
+                renderApp();
+            } catch (error) {
+                appContainer.innerHTML = `<p class="text-red-500 text-center col-span-full">เกิดข้อผิดพลาดในการโหลดการตั้งค่า: ${error.message}</p>`;
+                cardConfigurations = [];
+            }
+        }
 
+        async function checkSheetData(config, dateValue, resultsEl) {
+            // UPDATED: Handle N/A case with a specific disabled (gray) message
+            if (config.sheetId === 'N/A') {
+                return renderDisabledMessage(resultsEl, 'ไม่มีใช้งานในสาขา', 'การ์ดนี้ถูกปิดการใช้งาน');
+            }
+            // UPDATED: Handle empty sheetId with a specific info (amber) message
+            if (!config.sheetId) {
+                return renderInfoMessage(resultsEl, 'ยังไม่ได้ตั้งค่า Sheet ID', 'กรุณากำหนดค่าในหน้าตั้งค่า');
+            }
+            // UPDATED: Handle empty sheetName with a specific info (amber) message
+            if (!config.sheetName) {
+                return renderInfoMessage(resultsEl, 'ยังไม่ได้ตั้งค่า Sheet Name', 'กรุณากำหนดค่าในหน้าตั้งค่า');
+            }
+
+            if (!dateValue) {
+                resultsEl.innerHTML = '<p class="text-slate-500">กรุณาเลือกวันที่</p>';
+                return;
+            }
+
+            resultsEl.innerHTML = `<div class="loader-sm mx-auto animate-spin rounded-full border-2 border-slate-300 border-t-indigo-500"></div>`;
+            const cacheKey = `${config.sheetId}-${dateValue}`;
+            if (dataCache[cacheKey]) {
+                return processData(dataCache[cacheKey], resultsEl, config.targetCount);
+            }
+            try {
+                const filteredRows = await apiCall('getSheetData', { sheetId: config.sheetId, sheetName: config.sheetName, date: dateValue });
+                dataCache[cacheKey] = filteredRows;
+                processData(filteredRows, resultsEl, config.targetCount);
+            } catch (error) {
+                renderError(resultsEl, `เกิดข้อผิดพลาด: ${error.message}`);
+            }
+        }
+
+        function processData(dataRows, resultsEl, targetCount) {
+             const dateString = new Date(globalCheckDateInput.value).toLocaleDateString('th-TH', { dateStyle: 'long' });
+             renderResults(resultsEl, dataRows, dateString, targetCount);
+        }
+
+        // --- Refresh Logic ---
+        function refreshCurrentView() {
+            const selectedButton = document.querySelector('#user-buttons-container button.bg-indigo-600');
+            if (selectedButton) {
+                const username = selectedButton.textContent;
+                Object.keys(dataCache).forEach(key => delete dataCache[key]);
+                console.log('Cache cleared for refresh.');
+                const refreshIcon = refreshButton.querySelector('svg');
+                refreshIcon.classList.add('animate-spin');
+                refreshButton.disabled = true;
+                displayUserCards(username).finally(() => {
+                    refreshIcon.classList.remove('animate-spin');
+                    refreshButton.disabled = false;
+                });
+            } else {
+                alert('กรุณาเลือกผู้ใช้งานก่อนรีเฟรช');
+            }
+        }
+
+        // --- UI Rendering ---
+        function renderApp() {
+            appContainer.innerHTML = '';
+            if (cardConfigurations.length === 0) {
+                appContainer.innerHTML = '<p class="text-slate-500 text-center col-span-full">ผู้ใช้นี้ยังไม่มีการตั้งค่าการ์ด</p>';
+            } else {
+                cardConfigurations.forEach((config, index) => createCard(config, index));
+            }
+        }
+
+        function createCard(config, index) {
+            const resultsDivId = `results-${index}`;
+            const cardHtml = `<div id="card-${index}" class="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-xl p-6 md:p-8"><div class="text-center mb-4"><h1 class="text-xl sm:text-2xl font-bold text-slate-800">${config.title}</h1></div><div id="${resultsDivId}" class="min-h-[150px] flex items-center justify-center transition-all"></div></div>`;
+            appContainer.insertAdjacentHTML('beforeend', cardHtml);
+            checkSheetData(config, globalCheckDateInput.value, document.getElementById(resultsDivId));
+        }
+
+        function renderResults(resultsEl, entries, date, targetCount) {
+            resultsEl.innerHTML = '';
+            const COL_USER_IDX = 7, COL_NUMBER_IDX = 9;
+            const uniqueNumbers = new Set(entries.map(entry => entry[COL_NUMBER_IDX]).filter(Boolean));
+            const uniqueUsers = new Set(entries.map(entry => entry[COL_USER_IDX]).filter(Boolean));
+            
+            let statusBlock, detailsBlock;
+            
+            if (entries.length === 0) {
+                 statusBlock = `<div class="flex flex-col items-center justify-center text-center text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-2 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg><p class="font-semibold text-slate-700">ไม่พบข้อมูลสำหรับวันที่ ${date}</p></div>`;
+                 detailsBlock = '';
+            } else {
+                if (uniqueNumbers.size >= targetCount) {
+                    statusBlock = `<div class="bg-teal-100/50 border border-teal-200/80 text-teal-800 p-4 rounded-xl flex items-center space-x-4"><div class="flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-10 h-10 text-teal-500"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg></div><div class="min-w-0"><p class="font-bold text-lg">ครบแล้ว</p><p class="text-sm break-words">ตรวจครบ ${uniqueNumbers.size} หมายเลขสำหรับวันที่ ${date}</p></div></div>`;
+                } else {
+                    const needed = targetCount - uniqueNumbers.size;
+                    statusBlock = `<div class="bg-amber-100/50 border border-amber-200/80 text-amber-800 p-4 rounded-xl flex items-center space-x-4"><div class="flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-10 h-10 text-amber-500"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg></div><div class="min-w-0"><p class="font-bold text-lg">ยังไม่ครบ (${uniqueNumbers.size}/${targetCount})</p><p class="text-sm break-words">ขาดอีก ${needed} หมายเลขสำหรับวันที่ ${date}</p></div></div>`;
+                }
+                detailsBlock = `<div class="space-y-4 pt-4 text-sm mt-4 border-t border-slate-200"><div class="flex items-start space-x-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 flex-shrink-0 text-slate-400 mt-0.5"><path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.095a1.23 1.23 0 00.41-1.412A9.995 9.995 0 0010 12c-2.31 0-4.438.784-6.131 2.095z" /></svg><div><p class="font-semibold text-slate-600">ผู้ลงข้อมูล:</p><p class="text-slate-800 break-words">${uniqueUsers.size > 0 ? [...uniqueUsers].join(', ') : 'ไม่พบ'}</p></div></div><div class="flex items-start space-x-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 flex-shrink-0 text-slate-400 mt-0.5"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5z" clip-rule="evenodd" /></svg><div><p class="font-semibold text-slate-600">หมายเลขที่ตรวจแล้ว (${uniqueNumbers.size} หมายเลข):</p><p class="text-slate-800 break-words">${uniqueNumbers.size > 0 ? [...uniqueNumbers].join(', ') : 'ไม่พบ'}</p></div></div></div>`;
+            }
+            resultsEl.innerHTML = `<div class="w-full">${statusBlock}${detailsBlock}</div>`;
+        }
+        
+        function renderError(resultsEl, msg) {
+            resultsEl.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl flex flex-col items-center justify-center text-center"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg><p class="font-bold">เกิดข้อผิดพลาด</p><p class="text-sm">${msg}</p></div>`;
+        }
+
+        function renderDisabledMessage(resultsEl, title, msg) {
+            resultsEl.innerHTML = `<div class="bg-slate-50 border border-slate-200 text-slate-800 p-4 rounded-xl flex flex-col items-center justify-center text-center"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-2 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg><p class="font-bold">${title}</p><p class="text-sm text-slate-600">${msg}</p></div>`;
+        }
+        
+        function renderInfoMessage(resultsEl, title, msg) {
+            resultsEl.innerHTML = `<div class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl flex flex-col items-center justify-center text-center"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-2 text-amber-400"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg><p class="font-bold">${title}</p><p class="text-sm text-amber-700">${msg}</p></div>`;
+        }
+        
+        // --- Initial Load & Event Listeners ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Service Worker
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./admin-sw.js')
+                        .then(registration => console.log('Admin ServiceWorker registration successful with scope: ', registration.scope))
+                        .catch(err => console.log('Admin ServiceWorker registration failed: ', err));
+                });
+            }
+            
+            // Menu Listeners
+            menuDailyCheck.addEventListener('click', (e) => {
+                e.preventDefault();
+                showMainApp();
+            });
+            menuDetails.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('เมนู "รายละเอียดการตรวจสอบ" ยังไม่พร้อมใช้งาน');
+            });
+            menuSummary.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('เมนู "สรุปตรวจประจำเดือน" ยังไม่พร้อมใช้งาน');
+            });
+            menuOther.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('เมนู "เมนูอื่นๆ" ยังไม่พร้อมใช้งาน');
+            });
+
+            // Main App Listeners
+            backToMenuButton.addEventListener('click', showMainMenu);
+
+            globalCheckDateInput.value = new Date().toISOString().split('T')[0];
+            await loadAllUsers();
+
+            const lastSelectedUser = localStorage.getItem('lastSelectedUser');
+            if (lastSelectedUser) {
+                const userButton = [...document.querySelectorAll('#user-buttons-container button')].find(btn => btn.textContent === lastSelectedUser);
+                if (userButton) {
+                    userButton.click();
+                }
+            }
+            
+            globalCheckDateInput.addEventListener('change', () => {
+                const selectedButton = document.querySelector('#user-buttons-container button.bg-indigo-600');
+                if (selectedButton) {
+                    Object.keys(dataCache).forEach(key => delete dataCache[key]);
+                    displayUserCards(selectedButton.textContent);
+                }
+            });
+
+            refreshButton.addEventListener('click', refreshCurrentView);
+
+            userSearchInput.addEventListener('input', () => {
+                const searchTerm = userSearchInput.value.toLowerCase();
+                const userButtons = document.querySelectorAll('#user-buttons-container button');
+                userButtons.forEach(button => {
+                    const username = button.textContent.toLowerCase();
+                    if (username.includes(searchTerm)) {
+                        button.style.display = 'block';
+                    } else {
+                        button.style.display = 'none';
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>
