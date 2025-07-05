@@ -234,24 +234,29 @@
         </div>
     </div>
 
-    <!-- Daily Detail Modal (Pop-up) -->
-    <div id="daily-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
-        <!-- MODIFICATION: Removed 'overflow-hidden' and adjusted body structure for proper scrolling -->
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-            <!-- Modal Header -->
-            <div class="flex-shrink-0 flex justify-between items-center p-4 border-b border-slate-200">
-                <h2 id="daily-detail-modal-title" class="text-xl font-bold text-slate-800">รายละเอียดข้อมูล</h2>
-                <button id="daily-detail-modal-close" class="text-slate-500 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+    <!-- Daily Detail Page -->
+    <div id="daily-detail-page-container" class="hidden">
+        <header class="sticky top-0 z-20 w-full bg-white/95 backdrop-blur-sm border-b border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="py-4 flex items-center justify-between gap-4">
+                    <!-- Back to Daily Check Button -->
+                    <button id="detail-page-back-button" title="กลับไปหน้ารายการ" class="p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-700 rounded-full transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m8-8l-8 8 8 8" />
+                        </svg>
+                    </button>
+                    <h1 id="detail-page-header" class="text-xl font-bold text-slate-800 text-center flex-grow truncate">รายละเอียดข้อมูล</h1>
+                    <div class="w-6"></div> <!-- Spacer to balance the back button -->
+                </div>
             </div>
-            <!-- Modal Body (This is now the scrollable container) -->
-            <div id="daily-detail-modal-content" class="p-4 overflow-y-auto">
-                <!-- Table or loading spinner will be inserted here by JavaScript -->
+        </header>
+        <main>
+            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+                <div id="detail-page-content">
+                    <!-- Table or loading spinner will be inserted here -->
+                </div>
             </div>
-        </div>
+        </main>
     </div>
 
 
@@ -311,22 +316,24 @@
         const menuSummary = document.getElementById('menu-summary');
         const menuOther = document.getElementById('menu-other');
 
-        // --- DOM Elements (Daily Detail Modal) ---
-        const dailyDetailModal = document.getElementById('daily-detail-modal');
-        const dailyDetailModalTitle = document.getElementById('daily-detail-modal-title');
-        const dailyDetailModalContent = document.getElementById('daily-detail-modal-content');
-        const dailyDetailModalCloseButton = document.getElementById('daily-detail-modal-close');
+        // --- DOM Elements (Daily Detail Page) ---
+        const dailyDetailPageContainer = document.getElementById('daily-detail-page-container');
+        const detailPageHeader = document.getElementById('detail-page-header');
+        const detailPageContent = document.getElementById('detail-page-content');
+        const detailPageBackButton = document.getElementById('detail-page-back-button');
 
         // --- View Switching Logic ---
         function showDailyApp() {
             mainMenu.classList.add('hidden');
             monthlySummaryAppContainer.classList.add('hidden');
+            dailyDetailPageContainer.classList.add('hidden');
             dailyCheckAppContainer.classList.remove('hidden');
         }
 
         function showMonthlyApp() {
             mainMenu.classList.add('hidden');
             dailyCheckAppContainer.classList.add('hidden');
+            dailyDetailPageContainer.classList.add('hidden');
             monthlySummaryAppContainer.classList.remove('hidden');
         }
 
@@ -334,12 +341,20 @@
             mainMenu.classList.remove('hidden');
             dailyCheckAppContainer.classList.add('hidden');
             monthlySummaryAppContainer.classList.add('hidden');
+            dailyDetailPageContainer.classList.add('hidden');
             // Clear any selected user state when returning to main menu
             localStorage.removeItem('lastSelectedUserDaily');
             localStorage.removeItem('lastSelectedUserMonthly');
             document.querySelectorAll('button.bg-indigo-600, button.bg-amber-600').forEach(btn => {
                 btn.classList.remove('bg-indigo-600', 'text-white', 'font-semibold', 'shadow', 'bg-amber-600');
             });
+        }
+        
+        function showDailyDetailPage() {
+            mainMenu.classList.add('hidden');
+            dailyCheckAppContainer.classList.add('hidden');
+            monthlySummaryAppContainer.classList.add('hidden');
+            dailyDetailPageContainer.classList.remove('hidden');
         }
 
         // --- Sidebar Logic (Daily) ---
@@ -368,24 +383,17 @@
             document.body.classList.remove('overflow-hidden');
         }
 
-        // --- Daily Detail Modal Logic ---
-        function openDailyDetailModal(config, dateValue) {
-            dailyDetailModal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden'); // Prevent background scrolling
-            dailyDetailModalTitle.textContent = `รายละเอียด: ${config.title} (${dateValue})`;
-            dailyDetailModalContent.innerHTML = `<div class="loader-lg mx-auto animate-spin rounded-full border-4 border-slate-200 border-t-indigo-500"></div>`;
-
+        // --- Daily Detail Page Logic ---
+        function openDailyDetailPage(config, dateValue) {
+            showDailyDetailPage();
+            detailPageHeader.textContent = `รายละเอียด: ${config.title} (${dateValue})`;
+            detailPageContent.innerHTML = `<div class="flex justify-center items-center p-10"><div class="loader-lg mx-auto animate-spin rounded-full border-4 border-slate-200 border-t-indigo-500"></div></div>`;
             fetchDailyDetailData(config, dateValue);
-        }
-
-        function closeDailyDetailModal() {
-            dailyDetailModal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden'); // Restore background scrolling
         }
 
         async function fetchDailyDetailData(config, dateValue) {
             if (config.sheetId === 'N/A' || !config.sheetId || !config.sheetName) {
-                dailyDetailModalContent.innerHTML = `<p class="text-slate-500 text-center">ไม่สามารถแสดงรายละเอียดได้: การตั้งค่าไม่ถูกต้อง</p>`;
+                detailPageContent.innerHTML = `<p class="text-slate-500 text-center">ไม่สามารถแสดงรายละเอียดได้: การตั้งค่าไม่ถูกต้อง</p>`;
                 return;
             }
 
@@ -393,23 +401,42 @@
                 const filteredRows = await apiCall('getSheetData', { sheetId: config.sheetId, sheetName: config.sheetName, date: dateValue }, 'daily');
                 renderDailyDetailTable(filteredRows);
             } catch (error) {
-                dailyDetailModalContent.innerHTML = `<p class="text-red-500 text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</p>`;
+                detailPageContent.innerHTML = `<p class="text-red-500 text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</p>`;
             }
         }
 
         function renderDailyDetailTable(dataRows) {
-            if (dataRows.length === 0) {
-                dailyDetailModalContent.innerHTML = `<p class="text-slate-500 text-center">ไม่พบข้อมูลสำหรับวันนี้</p>`;
+            if (!dataRows || dataRows.length === 0) {
+                detailPageContent.innerHTML = `<div class="text-center py-12"><svg class="w-16 h-16 mx-auto text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg><h2 class="mt-4 text-2xl font-semibold text-slate-700">ไม่พบข้อมูล</h2><p class="mt-2 text-slate-500">ไม่พบข้อมูลสำหรับวันที่ที่เลือก</p></div>`;
                 return;
             }
 
-            const tableHeaders = [
-                'ผู้ลงข้อมูล', 'ข้อมูล 1', 'ข้อมูล 2', 'ข้อมูล 3', 'ข้อมูล 4', 'ข้อมูล 5', 'ข้อมูล 6', 'ข้อมูล 7',
-                'ข้อมูล 8', 'ข้อมูล 9', 'ข้อมูล 10', 'ข้อมูล 11', 'ข้อมูล 12', 'ข้อมูล 13', 'ข้อมูล 14', 'ข้อมูล 15'
-            ]; // Adjusted for indices 7-21 (15 columns)
-            const columnIndices = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+            // Find the maximum number of columns in the dataset
+            let maxCols = 0;
+            dataRows.forEach(row => {
+                if (row.length > maxCols) {
+                    maxCols = row.length;
+                }
+            });
 
-            let tableHtml = `<div class="overflow-x-auto"><table class="min-w-full divide-y divide-slate-200 shadow-md rounded-lg">
+            // If there are no columns beyond index 7, show a message
+            if (maxCols <= 7) {
+                detailPageContent.innerHTML = `<div class="text-center py-12"><svg class="w-16 h-16 mx-auto text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg><h2 class="mt-4 text-2xl font-semibold text-slate-700">ไม่พบข้อมูลรายละเอียด</h2><p class="mt-2 text-slate-500">ไม่มีข้อมูลรายละเอียดที่จะแสดง</p></div>`;
+                return;
+            }
+
+            // Generate dynamic headers, starting from index 7
+            const tableHeaders = [];
+            for (let i = 7; i < maxCols; i++) {
+                 if (i === 7) {
+                    tableHeaders.push('ผู้ลงข้อมูล');
+                 } else {
+                    tableHeaders.push(`ข้อมูล ${i - 7}`);
+                 }
+            }
+
+            // Build the table HTML
+            let tableHtml = `<div class="overflow-x-auto bg-white rounded-lg shadow"><table class="min-w-full divide-y divide-slate-200">
                 <thead class="bg-slate-50">
                     <tr>`;
             tableHeaders.forEach(header => {
@@ -417,17 +444,19 @@
             });
             tableHtml += `</tr></thead><tbody class="bg-white divide-y divide-slate-200">`;
 
+            // Build the table rows with dynamic columns
             dataRows.forEach(row => {
                 tableHtml += `<tr>`;
-                columnIndices.forEach(idx => {
-                    const cellData = row[idx] !== undefined && row[idx] !== null ? row[idx] : '';
+                // Loop from index 7 to the max number of columns found
+                for (let i = 7; i < maxCols; i++) {
+                    const cellData = row[i] !== undefined && row[i] !== null ? row[i] : '';
                     tableHtml += `<td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">${cellData}</td>`;
-                });
+                }
                 tableHtml += `</tr>`;
             });
 
             tableHtml += `</tbody></table></div>`;
-            dailyDetailModalContent.innerHTML = tableHtml;
+            detailPageContent.innerHTML = tableHtml;
         }
 
         // --- Utility ---
@@ -601,7 +630,7 @@
             cardElement.addEventListener('click', () => {
                 const selectedConfig = cardConfigurations[parseInt(cardElement.dataset.configIndex)];
                 const selectedDate = cardElement.dataset.date;
-                openDailyDetailModal(selectedConfig, selectedDate);
+                openDailyDetailPage(selectedConfig, selectedDate);
             });
 
             checkDailySheetData(config, dailyGlobalCheckDateInput.value, document.getElementById(resultsDivId));
@@ -835,7 +864,10 @@
 
             const closeModal = () => {
                 modal.remove();
-                document.body.classList.remove('overflow-hidden');
+                // Only remove overflow-hidden if no other modals/overlays are active
+                if (!document.querySelector('#daily-sidebar-overlay:not(.hidden)')) {
+                   document.body.classList.remove('overflow-hidden');
+                }
             };
 
             closeButton.addEventListener('click', closeModal);
@@ -952,14 +984,8 @@
                 });
             });
 
-            // Daily Detail Modal Listeners
-            dailyDetailModalCloseButton.addEventListener('click', closeDailyDetailModal);
-            dailyDetailModal.addEventListener('click', (e) => {
-                // Close modal if clicking outside the content
-                if (e.target === dailyDetailModal) {
-                    closeDailyDetailModal();
-                }
-            });
+            // Daily Detail Page Listeners
+            detailPageBackButton.addEventListener('click', showDailyApp);
         });
     </script>
 </body>
