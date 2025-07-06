@@ -1,0 +1,29 @@
+{
+  "name": "Admin Dashboard - Online Checker",
+  "short_name": "Admin Checker",
+  "description": "แดชบอร์ดสำหรับผู้ดูแลระบบเพื่อตรวจสอบข้อมูลผู้ใช้ทั้งหมด",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#4338ca",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/mm12346/test1/refs/heads/main/requirements(1).png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/mm12346/test1/refs/heads/main/requirements.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/mm12346/test1/refs/heads/main/requirements(1).png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
