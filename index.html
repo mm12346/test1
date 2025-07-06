@@ -2,8 +2,8 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <!-- Updated viewport to prevent zooming -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <!-- Updated viewport to prevent zooming and support safe-area-insets -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Online Checker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,12 @@
         /* Apply font and background to body */
         body { 
             font-family: 'Sarabun', sans-serif; 
-            background-color: #f1f5f9; 
+            background-color: #ffffff; /* Changed to white */
+            /* Ensure content starts below the notch and ends above the home indicator */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
         }
 
         /* Hide scrollbar for WebKit browsers (Chrome, Safari, Opera) for both html and body */
@@ -57,13 +62,18 @@
         }
         .loader-sm { width: 20px; height: 20px; }
         .loader-lg { width: 48px; height: 48px; }
+
+        /* Adjust sticky headers to account for the top safe area */
+        header.sticky {
+            top: env(safe-area-inset-top, 0px); /* Fallback to 0px if not supported */
+        }
         
     </style>
 </head>
-<body class="bg-slate-100">
+<body class="bg-white"> <!-- Changed to bg-white -->
 
     <!-- Main Menu Page -->
-    <div id="main-menu" class="flex flex-col items-center justify-center min-h-screen bg-slate-100 p-4">
+    <div id="main-menu" class="flex flex-col items-center justify-center min-h-screen bg-white p-4"> <!-- Changed to bg-white -->
         <div class="text-center mb-12">
             <h1 class="text-4xl font-bold text-indigo-600">Online Checker</h1>
             <p class="text-slate-500 mt-2">โปรแกรมตรวจสอบข้อมูลออนไลน์</p>
@@ -282,7 +292,7 @@
         // --- Configuration ---
         const SCRIPT_URLS = [
             'https://script.google.com/macros/s/AKfycbwsKgINhyiziRXNHyLVGjox-AoOYn4n1Iwz0vnLrX0tK26YGLGT0UOfzJfBU1fGbAlf/exec',//API_1 (Daily)
-            'https://script.google.com/macros/s/AKfycbyY8StXDzPsEHHHb9Y7qmTQH_fUknJ7bQVpS_qTqkRbaO7iszWwrdGObLcYBdwx5mTq/exec1',//API_2 (Daily)
+            'https://script.google.com/macros/s/AKfycbyY8StXDzPsEHHHb9Y7qmTQH_fUknJ7bQVpS_qTqkRbaO7iszWwrdGObLcYBdwx5mTq/exec',//API_2 (Daily)
             'https://script.google.com/macros/s/AKfycbweG-pW-j5DQJc2Bf27zE-l6xpdnZS_z19MqClc0-POdxoKtwH_hbA86NjkKpnk6Zgp/exec',//API_3 (Daily)
             'https://script.google.com/macros/s/AKfycbxgPHFAoISxt0bzwY9JjwhJShKTf7IuHy3qCrLjl5xqXKIB8y1pQazaTIm0EKhw7xHW/exec',//API_4 (Daily)
             'https://script.google.com/macros/s/AKfycbzaukac9i4eXChJdU51UiqgXWHZ1BAZvxc1uwMl-63fYDfwavE636zRBlhZhrxpqP1x/exec'//API_5 (Daily)
@@ -351,9 +361,9 @@
 
         function showMonthlyApp() {
             mainMenu.classList.add('hidden');
+            monthlySummaryAppContainer.classList.remove('hidden');
             dailyCheckAppContainer.classList.add('hidden');
             dailyDetailPageContainer.classList.add('hidden');
-            monthlySummaryAppContainer.classList.remove('hidden');
         }
 
         function showMainMenu() {
@@ -519,9 +529,6 @@
         }
 
         // --- Utility ---
-        // Removed currentDailyUrlIndex and getDailyScriptUrl
-        // Removed currentMonthlyUrlIndex and getMonthlyScriptUrl
-
         async function apiCall(action, payload = {}, scriptType = 'daily') {
             const isGet = action.startsWith('load') || action.startsWith('get') || action.startsWith('getDataLabelsForCard');
             const options = { method: isGet ? 'GET' : 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' } };
