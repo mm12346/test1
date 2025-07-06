@@ -504,8 +504,8 @@
                 const user = row[7] !== undefined && row[7] !== null ? row[7] : 'ไม่ระบุ';
                 const number = row[9] !== undefined && row[9] !== null ? row[9] : 'ไม่ระบุ';
 
-                // Determine background color based on index for alternating effect
-                const bgColorClass = index % 2 === 0 ? 'bg-white' : 'bg-slate-50';
+                // Set a consistent background color for all detail cards
+                const bgColorClass = 'bg-white'; 
 
                 let additionalDataHtml = '';
                 // Start from index 10 for additional data
