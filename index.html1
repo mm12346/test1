@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <!-- Updated viewport to support safe areas on notched devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Online Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- PWA Manifest & Theme for Admin -->
+    <link rel="manifest" href="admin-manifest.json">
+    <meta name="theme-color" content="#f1f5f9"> <!-- Changed to match body background -->
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/mm12346/test1/refs/heads/main/requirements(2).png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Admin Checker">
+    
+    <style>
+        /* Define safe-area variables with fallbacks */
+        :root {
+            --safe-area-inset-top: env(safe-area-inset-top, 0px);
+            --safe-area-inset-right: env(safe-area-inset-right, 0px);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-area-inset-left: env(safe-area-inset-left, 0px);
+        }
+
+        /* Apply font and background to body */
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background-color: #f1f5f9; 
+            /* Ensure body background color fills the entire screen, including notch area */
+        }
+
+        /* Hide scrollbar for WebKit browsers (Chrome, Safari, Opera) for both html and body */
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for Firefox for both html and body */
+        html {
+            scrollbar-width: none; /* Firefox */
+        }
+        body {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* Hide scrollbar for elements with overflow-y-auto or overflow-x-auto */
+        .overflow-y-auto::-webkit-scrollbar,
+        .overflow-x-auto::-webkit-scrollbar {
+            display: none;
+        }
+        .overflow-y-auto,
+        .overflow-x-auto {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE and Edge */
+        }
+
+        /* When the body has this class, it prevents scrolling */
+        body.overflow-hidden {
+            overflow: hidden;
+        }
+        .loader-sm { width: 20px; height: 20px; }
+        .loader-lg { width: 48px; height: 48px; }
+
+        /* --- PWA Notch/Safe-Area Handling --- */
+
+        /* Add padding to the main menu to push it down from the notch */
+        #main-menu {
+            padding-top: var(--safe-area-inset-top);
+            padding-bottom: var(--safe-area-inset-bottom);
+        }
+        
+        /* Adjust sticky headers to sit below the notch */
+        #daily-check-app-container header,
+        #monthly-summary-app-container header,
+        #daily-detail-page-container header {
+            padding-top: var(--safe-area-inset-top);
+        }
+
+        /* Adjust the sidebar to not be covered by the notch and bottom home bar */
+        #daily-sidebar, #monthly-sidebar {
+            padding-top: var(--safe-area-inset-top);
+            padding-bottom: var(--safe-area-inset-bottom);
+        }
+        
+        /* Adjust height calculation for the scrollable area inside the sidebar */
+        #daily-user-buttons-container, #monthly-user-buttons-container {
+             height: calc(100vh - 210px - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+        }
+
+    </style>
+</head>
+<body class="bg-slate-100">
+
+    <!-- Main Menu Page -->
+    <div id="main-menu" class="flex flex-col items-center justify-center min-h-screen bg-slate-100 p-4">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-indigo-600">Online Checker</h1>
+            <p class="text-slate-500 mt-2">โปรแกรมตรวจสอบข้อมูลออนไลน์</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-4xl">
+            <!-- Menu Item 1: Daily Check -->
+            <a href="#" id="menu-daily-check" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center">
+                <div class="bg-indigo-100 text-indigo-600 rounded-full p-4 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </div>
+                <h2 class="text-xl font-semibold text-slate-800">ตรวจสอบรายวัน</h2>
+                <p class="text-sm text-slate-500 mt-1">เข้าสู่หน้าตรวจสอบข้อมูลประจำวัน</p>
+            </a>
+            <!-- Menu Item 2: Details (Reordered) -->
+            <a href="#" id="menu-details" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center opacity-60 cursor-not-allowed">
+                <div class="bg-sky-100 text-sky-600 rounded-full p-4 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                </div>
+                <h2 class="text-xl font-semibold text-slate-800">รายละเอียดการตรวจสอบ</h2>
+                <p class="text-sm text-slate-500 mt-1">เร็วๆ นี้</p>
+            </a>
+            <!-- Menu Item 3: Summary (Reordered) -->
+            <a href="#" id="menu-summary" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center">
+                <div class="bg-amber-100 text-amber-600 rounded-full p-4 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                </div>
+                <h2 class="text-xl font-semibold text-slate-800">สรุปตรวจประจำเดือน</h2>
+                <p class="text-sm text-slate-500 mt-1">เข้าสู่หน้าสรุปข้อมูลประจำเดือน</p>
+            </a>
+            <!-- Menu Item 4: Others -->
+            <a href="#" id="menu-other" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center opacity-60 cursor-not-allowed">
+                <div class="bg-slate-100 text-slate-600 rounded-full p-4 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </div>
+                <h2 class="text-xl font-semibold text-slate-800">เมนูอื่นๆ</h2>
+                <p class="text-sm text-slate-500 mt-1">เร็วๆ นี้</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Application Page (Daily Check) -->
+    <div id="daily-check-app-container" class="hidden">
+        <!-- Sidebar -->
+        <aside id="daily-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+            <div class="flex items-center justify-center p-4 border-b border-slate-200">
+                 <svg class="w-8 h-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Zm3.75 11.625a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg>
+                 <h1 class="text-xl font-bold text-slate-800 ml-2">เมนูรายวัน</h1>
+            </div>
+            <div class="p-4">
+                <h2 class="text-lg font-semibold text-slate-700 mb-4">เลือกสาขา</h2>
+                <div class="mb-4">
+                    <input type="text" id="daily-user-search-input" placeholder="ค้นหาสาขา..." class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                </div>
+                <div id="daily-user-buttons-container" class="flex flex-col space-y-2 overflow-y-auto">
+                    <!-- User buttons will be inserted here -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Overlay for mobile -->
+        <div id="daily-sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+
+        <!-- Main Content -->
+        <div class="lg:ml-64 transition-all duration-300 ease-in-out">
+            <header class="sticky top-0 z-20 w-full bg-white/95 backdrop-blur-sm border-b border-slate-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="py-4 flex items-center justify-between gap-4">
+                        <!-- Back to Menu Button -->
+                        <button id="daily-back-to-menu-button" title="กลับไปหน้าเมนูหลัก" class="p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-700 rounded-full transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m8-8l-8 8 8 8" />
+                            </svg>
+                        </button>
+
+                        <!-- Hamburger button for mobile -->
+                        <button id="daily-sidebar-toggle" class="lg:hidden text-slate-500 hover:text-slate-700">
+                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                            </svg>
+                        </button>
+                        
+                        <div class="flex-grow flex items-center justify-end gap-4">
+                            <input type="date" id="daily-global-check-date" class="w-full max-w-xs px-4 py-2 bg-slate-100 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition">
+                            <button id="daily-refresh-button" title="รีเฟรชข้อมูล" class="p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-700 rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9 0 0 1 6.74 2.74L21 8"></path>
+                                    <path d="M21 3v5h-5"></path>
+                                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9 0 0 1-6.74-2.74L3 16"></path>
+                                    <path d="M3 21v-5h5"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main>
+                <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+                    <div id="daily-user-info" class="hidden">
+                         <h3 class="text-2xl font-bold text-slate-800 mb-4" id="daily-current-user-header"></h3>
+                         <div id="daily-app-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            <!-- Cards will be inserted here -->
+                        </div>
+                    </div>
+                     <div id="daily-welcome-message" class="text-center py-12">
+                        <svg class="w-16 h-16 mx-auto text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                        <h2 class="mt-4 text-2xl font-semibold text-slate-700">ยินดีต้อนรับ</h2>
+                        <p class="mt-2 text-slate-500">กรุณาเลือกผู้ใช้งานจากเมนูด้านข้างเพื่อดูข้อมูล</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Monthly Summary Application Page -->
+    <div id="monthly-summary-app-container" class="hidden">
+        <!-- Sidebar -->
+        <aside id="monthly-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+            <div class="flex items-center justify-center p-4 border-b border-slate-200">
+                 <svg class="w-8 h-8 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                 <h1 class="text-xl font-bold text-slate-800 ml-2">เมนูสรุปรายเดือน</h1>
+            </div>
+            <div class="p-4">
+                <h2 class="text-lg font-semibold text-slate-700 mb-4">เลือกสาขา</h2>
+                <div class="mb-4">
+                    <input type="text" id="monthly-user-search-input" placeholder="ค้นหาสาขา..." class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition">
+                </div>
+                <div id="monthly-user-buttons-container" class="flex flex-col space-y-2 overflow-y-auto">
+                    <!-- User buttons will be inserted here -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Overlay for mobile -->
+        <div id="monthly-sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+
+        <!-- Main Content -->
+        <div class="lg:ml-64 transition-all duration-300 ease-in-out">
+            <header class="sticky top-0 z-20 w-full bg-white/95 backdrop-blur-sm border-b border-slate-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="py-4 flex items-center justify-between gap-4">
+                        <!-- Back to Menu Button -->
+                        <button id="monthly-back-to-menu-button" title="กลับไปหน้าเมนูหลัก" class="p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-700 rounded-full transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m8-8l-8 8 8 8" />
+                            </svg>
+                        </button>
+
+                        <!-- Hamburger button for mobile -->
+                        <button id="monthly-sidebar-toggle" class="lg:hidden text-slate-500 hover:text-slate-700">
+                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                            </svg>
+                        </button>
+                        
+                        <div class="flex-grow flex items-center justify-end gap-4">
+                            <input type="month" id="monthly-global-check-month" class="w-full max-w-xs px-4 py-2 bg-slate-100 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 transition">
+                            <button id="monthly-refresh-button" title="รีเฟรชข้อมูล" class="p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-700 rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9 0 0 1 6.74 2.74L21 8"></path>
+                                    <path d="M21 3v5h-5"></path>
+                                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9 0 0 1-6.74-2.74L3 16"></path>
+                                    <path d="M3 21v-5h5"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main>
+                <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+                    <div id="monthly-user-info" class="hidden">
+                         <h3 class="text-2xl font-bold text-slate-800 mb-4" id="monthly-current-user-header"></h3>
+                         <div id="monthly-app-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            <!-- Cards will be inserted here -->
+                        </div>
+                    </div>
+                     <div id="monthly-welcome-message" class="text-center py-12">
+                        <svg class="w-16 h-16 mx-auto text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                        <h2 class="mt-4 text-2xl font-semibold text-slate-700">ยินดีต้อนรับ</h2>
+                        <p class="mt-2 text-slate-500">กรุณาเลือกผู้ใช้งานจากเมนูด้านข้างเพื่อดูข้อมูล</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Daily Detail Page -->
+    <div id="daily-detail-page-container" class="hidden">
+        <header class="sticky top-0 z-20 w-full bg-white/95 backdrop-blur-sm border-b border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="py-4 flex items-center justify-between gap-4">
+                    <!-- Back to Daily Check Button -->
+                    <button id="detail-page-back-button" title="กลับไปหน้ารายการ" class="p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-700 rounded-full transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m8-8l-8 8 8 8" />
+                        </svg>
+                    </button>
+                    <h1 id="detail-page-header" class="text-xl font-bold text-slate-800 text-center flex-grow truncate">รายละเอียดข้อมูล</h1>
+                    <div class="w-6"></div> <!-- Spacer to balance the back button -->
+                </div>
+            </div>
+        </header>
+        <main>
+            <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+                <div id="detail-page-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Cards will be inserted here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    <script>
+        // --- Configuration ---
+        const SCRIPT_URLS = [
+            'https://script.google.com/macros/s/AKfycbwsKgINhyiziRXNHyLVGjox-AoOYn4n1Iwz0vnLrX0tK26YGLGT0UOfzJfBU1fGbAlf/exec',//API_1 (Daily)
+            'https://script.google.com/macros/s/AKfycbyY8StXDzPsEHHHb9Y7qmTQH_fUknJ7bQVpS_qTqkRbaO7iszWwrdGObLcYBdwx5mTq/exec1',//API_2 (Daily)
+            'https://script.google.com/macros/s/AKfycbweG-pW-j5DQJc2Bf27zE-l6xpdnZS_z19MqClc0-POdxoKtwH_hbA86NjkKpnk6Zgp/exec',//API_3 (Daily)
+            'https://script.google.com/macros/s/AKfycbxgPHFAoISxt0bzwY9JjwhJShKTf7IuHy3qCrLjl5xqXKIB8y1pQazaTIm0EKhw7xHW/exec',//API_4 (Daily)
+            'https://script.google.com/macros/s/AKfycbzaukac9i4eXChJdU51UiqgXWHZ1BAZvxc1uwMl-63fYDfwavE636zRBlhZhrxpqP1x/exec'//API_5 (Daily)
+        ];
+
+        // IMPORTANT: Replace with the deployed URL of your NEWLY UPDATED Monthly Summary Apps Script (from the immersive above)
+        const MONTHLY_SCRIPT_URLS = [
+            'https://script.google.com/macros/s/AKfycbzfUotb2OaRKU3z3L_6NHfnbaMqQNEjGcDWxJuXVwPVB55sn7SO04HTGeD82VpeUh8/exec' // <-- **Replace this with your new Apps Script URL**
+        ];
+
+        let cardConfigurations = [];
+        const dailyDataCache = {};
+        const monthlyDataCache = {};
+        const dataLabelsCache = {}; // Global cache for data labels
+
+        // --- DOM Elements (Daily Check) ---
+        const dailyCheckAppContainer = document.getElementById('daily-check-app-container');
+        const dailyUserButtonsContainer = document.getElementById('daily-user-buttons-container');
+        const dailyUserInfo = document.getElementById('daily-user-info');
+        const dailyWelcomeMessage = document.getElementById('daily-welcome-message');
+        const dailyCurrentUserHeader = document.getElementById('daily-current-user-header');
+        const dailyAppContainer = document.getElementById('daily-app-container');
+        const dailyGlobalCheckDateInput = document.getElementById('daily-global-check-date');
+        const dailySidebar = document.getElementById('daily-sidebar');
+        const dailySidebarToggle = document.getElementById('daily-sidebar-toggle');
+        const dailySidebarOverlay = document.getElementById('daily-sidebar-overlay');
+        const dailyRefreshButton = document.getElementById('daily-refresh-button');
+        const dailyUserSearchInput = document.getElementById('daily-user-search-input');
+        const dailyBackToMenuButton = document.getElementById('daily-back-to-menu-button');
+
+        // --- DOM Elements (Monthly Summary) ---
+        const monthlySummaryAppContainer = document.getElementById('monthly-summary-app-container');
+        const monthlyUserButtonsContainer = document.getElementById('monthly-user-buttons-container');
+        const monthlyUserInfo = document.getElementById('monthly-user-info');
+        const monthlyWelcomeMessage = document.getElementById('monthly-welcome-message');
+        const monthlyCurrentUserHeader = document.getElementById('monthly-current-user-header');
+        const monthlyAppContainer = document.getElementById('monthly-app-container');
+        const monthlyGlobalCheckMonthInput = document.getElementById('monthly-global-check-month');
+        const monthlySidebar = document.getElementById('monthly-sidebar');
+        const monthlySidebarToggle = document.getElementById('monthly-sidebar-toggle');
+        const monthlySidebarOverlay = document.getElementById('monthly-sidebar-overlay');
+        const monthlyRefreshButton = document.getElementById('monthly-refresh-button');
+        const monthlyUserSearchInput = document.getElementById('monthly-user-search-input');
+        const monthlyBackToMenuButton = document.getElementById('monthly-back-to-menu-button');
+
+        // --- DOM Elements (Main Menu) ---
+        const mainMenu = document.getElementById('main-menu');
+        const menuDailyCheck = document.getElementById('menu-daily-check');
+        const menuDetails = document.getElementById('menu-details');
+        const menuSummary = document.getElementById('menu-summary');
+        const menuOther = document.getElementById('menu-other');
+
+        // --- DOM Elements (Daily Detail Page) ---
+        const dailyDetailPageContainer = document.getElementById('daily-detail-page-container');
+        const detailPageHeader = document.getElementById('detail-page-header');
+        const detailPageContent = document.getElementById('detail-page-content');
+        const detailPageBackButton = document.getElementById('detail-page-back-button');
+
+        // --- View Switching Logic ---
+        function showDailyApp() {
+            mainMenu.classList.add('hidden');
+            monthlySummaryAppContainer.classList.add('hidden');
+            dailyDetailPageContainer.classList.add('hidden');
+            dailyCheckAppContainer.classList.remove('hidden');
+        }
+
+        function showMonthlyApp() {
+            mainMenu.classList.add('hidden');
+            dailyCheckAppContainer.classList.add('hidden');
+            dailyDetailPageContainer.classList.add('hidden');
+            monthlySummaryAppContainer.classList.remove('hidden');
+        }
+
+        function showMainMenu() {
+            mainMenu.classList.remove('hidden');
+            dailyCheckAppContainer.classList.add('hidden');
+            monthlySummaryAppContainer.classList.add('hidden');
+            dailyDetailPageContainer.classList.add('hidden');
+            // Clear any selected user state when returning to main menu
+            localStorage.removeItem('lastSelectedUserDaily');
+            localStorage.removeItem('lastSelectedUserMonthly');
+            document.querySelectorAll('button.bg-indigo-600, button.bg-amber-600').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'font-semibold', 'shadow', 'bg-amber-600');
+            });
+        }
+        
+        function showDailyDetailPage() {
+            mainMenu.classList.add('hidden');
+            dailyCheckAppContainer.classList.add('hidden');
+            monthlySummaryAppContainer.classList.add('hidden');
+            dailyDetailPageContainer.classList.remove('hidden');
+        }
+
+        // --- Sidebar Logic (Daily) ---
+        function openDailySidebar() {
+            dailySidebar.classList.remove('-translate-x-full');
+            dailySidebarOverlay.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeDailySidebar() {
+            dailySidebar.classList.add('-translate-x-full');
+            dailySidebarOverlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        // --- Sidebar Logic (Monthly) ---
+        function openMonthlySidebar() {
+            monthlySidebar.classList.remove('-translate-x-full');
+            monthlySidebarOverlay.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeMonthlySidebar() {
+            monthlySidebar.classList.add('-translate-x-full');
+            monthlySidebarOverlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        // --- Daily Detail Page Logic ---
+        function openDailyDetailPage(config, dateValue) {
+            showDailyDetailPage();
+            detailPageHeader.textContent = `รายละเอียด: ${config.title} (${dateValue})`;
+            detailPageContent.innerHTML = `<div class="flex justify-center items-center p-10 col-span-full"><div class="loader-lg mx-auto animate-spin rounded-full border-4 border-slate-200 border-t-indigo-500"></div></div>`;
+            fetchDailyDetailData(config, dateValue);
+        }
+
+        async function fetchDailyDetailData(config, dateValue) {
+            if (config.sheetId === 'N/A' || !config.sheetId || !config.sheetName) {
+                detailPageContent.innerHTML = `<p class="text-slate-500 text-center col-span-full">ไม่สามารถแสดงรายละเอียดได้: การตั้งค่าไม่ถูกต้อง</p>`;
+                return;
+            }
+
+            try {
+                // This call uses the 'daily' script type as getSheetData is part of the daily script
+                const filteredRows = await apiCall('getSheetData', { sheetId: config.sheetId, sheetName: config.sheetName, date: dateValue }, 'daily');
+                renderDailyDetailCards(filteredRows, config); // Changed to renderDailyDetailCards and pass config
+            } catch (error) {
+                detailPageContent.innerHTML = `<p class="text-red-500 text-center col-span-full">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</p>`;
+            }
+        }
+
+        // New function to fetch data labels for a specific card title
+        async function fetchDataLabelsForCard(cardTitle) {
+            const cacheKey = `dataLabels-${cardTitle}`;
+            if (dataLabelsCache[cacheKey]) {
+                return dataLabelsCache[cacheKey];
+            }
+
+            try {
+                // This call uses the 'monthly' script type as getDataLabelsForCard is now in the monthly script
+                const result = await apiCall('getDataLabelsForCard', {
+                    spreadsheetId: '17slzkEJpbc3YEcm0vQg_22QqTFtLyzp03-4CCIrmbpA', // Specific Spreadsheet ID for data labels
+                    sheetName: 'ชื่อข้อมูล', // Specific sheet name for data labels
+                    cardTitle: cardTitle
+                }, 'monthly'); 
+
+                // Check for result.success explicitly
+                if (result && result.success && Array.isArray(result.labels)) {
+                    dataLabelsCache[cacheKey] = result.labels;
+                    return result.labels;
+                } else {
+                    console.warn(`No specific labels found for card: ${cardTitle} or API call was unsuccessful. Result:`, result);
+                    return []; // Return empty array to trigger generic labels
+                }
+            } catch (error) {
+                console.error(`Error fetching data labels for card ${cardTitle}:`, error);
+                return []; // Fallback to empty array on error
+            }
+        }
+
+        // MODIFIED: Function to render data as cards
+        async function renderDailyDetailCards(dataRows, config) { // Accept config
+            if (!dataRows || dataRows.length === 0) {
+                detailPageContent.innerHTML = `<div class="text-center py-12 col-span-full"><svg class="w-16 h-16 mx-auto text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg><h2 class="mt-4 text-2xl font-semibold text-slate-700">ไม่พบข้อมูล</h2><p class="mt-2 text-slate-500">ไม่พบข้อมูลสำหรับวันที่ที่เลือก</p></div>`;
+                return;
+            }
+
+            detailPageContent.innerHTML = ''; // Clear previous content
+
+            const customLabels = await fetchDataLabelsForCard(config.title); // Fetch custom labels using card title
+
+            dataRows.forEach((row, index) => {
+                const user = row[7] !== undefined && row[7] !== null ? row[7] : 'ไม่ระบุ';
+                const number = row[9] !== undefined && row[9] !== null ? row[9] : 'ไม่ระบุ';
+
+                // Set a consistent background color for all detail cards
+                const bgColorClass = 'bg-white'; 
+
+                let additionalDataHtml = '';
+                // Start from index 10 for additional data
+                for (let i = 10; i < row.length; i++) {
+                    // Use custom label if available, otherwise fallback to generic
+                    const dataLabel = customLabels[i - 10] || `ข้อมูล ${i - 9}`; 
+                    const dataValue = row[i] !== undefined && row[i] !== null ? row[i] : '';
+                    
+                    let valueColorClass = 'text-slate-800'; // Default color
+                    if (typeof dataValue === 'string') {
+                        if (dataValue.toLowerCase() === 'ปกติ') {
+                            valueColorClass = 'text-green-600';
+                        } else if (dataValue.toLowerCase() === 'ไม่ปกติ') {
+                            valueColorClass = 'text-red-600';
+                        }
+                    }
+
+                    if (dataValue) { // Only add if there's a value
+                        additionalDataHtml += `
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-slate-600 font-medium">${dataLabel}:</span>
+                                <span class="font-normal ${valueColorClass}">${dataValue}</span>
+                            </div>
+                        `;
+                    }
+                }
+
+                const cardHtml = `
+                    <div class="${bgColorClass} rounded-lg shadow-md p-4 space-y-2 border border-slate-200 transition-all duration-200 hover:shadow-lg hover:border-indigo-300">
+                        <div class="text-center">
+                            <p class="text-md text-slate-700 font-semibold mb-1">หมายเลข: <span class="font-medium text-indigo-600">${number}</span></p>
+                            <p class="text-lg font-bold text-slate-800">ผู้ลงข้อมูล: <span class="text-indigo-600">${user}</span></p>
+                        </div>
+                        ${additionalDataHtml ? `<div class="mt-3 pt-3 border-t border-slate-200 space-y-1">${additionalDataHtml}</div>` : ''}
+                    </div>
+                `;
+                detailPageContent.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // --- Utility ---
+        async function apiCall(action, payload = {}, scriptType = 'daily') {
+            const isGet = action.startsWith('load') || action.startsWith('get') || action.startsWith('getDataLabelsForCard');
+            const options = { method: isGet ? 'GET' : 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' } };
+            
+            const urlsToTry = scriptType === 'daily' ? SCRIPT_URLS : MONTHLY_SCRIPT_URLS;
+            
+            for (const baseUrl of urlsToTry) {
+                const url = new URL(baseUrl);
+                
+                // Log the URL for debugging
+                console.log(`Attempting API call to (${scriptType}): ${url.toString()} with action: ${action}`);
+
+                if (isGet) {
+                    Object.entries({ action, ...payload }).forEach(([key, value]) => url.searchParams.append(key, value));
+                } else {
+                    options.body = JSON.stringify({ action, ...payload });
+                }
+
+                try {
+                    const res = await fetch(url, options);
+                    if (!res.ok) {
+                        console.warn(`API call to ${url.toString()} failed with status: ${res.status} ${res.statusText}. Trying next URL.`);
+                        continue; // Try next URL
+                    }
+                    const result = await res.json();
+                    if (result.error || result.success === false) {
+                        console.warn(`API call to ${url.toString()} returned an error: ${result.error || 'Unknown API error'}. Trying next URL.`);
+                        continue; // Try next URL
+                    }
+                    console.log(`API call to ${url.toString()} successful.`);
+                    return result; // Success, return result
+                } catch (error) {
+                    console.warn(`Fetch error for ${url.toString()}: ${error.message}. Trying next URL.`);
+                    continue; // Try next URL
+                }
+            }
+            // If loop finishes, all URLs failed
+            throw new Error(`Failed to fetch data from all available ${scriptType} API endpoints for action: ${action}.`);
+        }
+
+        // --- User Loading (Shared for Daily and Monthly) ---
+        async function loadAllUsers(targetUserButtonsContainer, selectedUserLocalStorageKey, displayFunction) {
+            targetUserButtonsContainer.innerHTML = `<div class="loader-sm animate-spin rounded-full border-2 border-slate-300 border-t-indigo-500 mx-auto"></div>`;
+            try {
+                // Uses 'daily' script to get all users, as it's assumed to be the primary source
+                const result = await apiCall('getAllUsers', {}, 'daily'); 
+                const users = result.users || [];
+                targetUserButtonsContainer.innerHTML = '';
+                users.forEach(user => {
+                    const button = document.createElement('button');
+                    button.textContent = user;
+                    button.className = 'w-full text-left px-4 py-2 bg-white border border-transparent rounded-lg hover:bg-indigo-50 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition block';
+                    button.onclick = () => {
+                        // Remove active class from all buttons in the current container
+                        document.querySelectorAll(`#${targetUserButtonsContainer.id} button`).forEach(btn => btn.classList.remove('bg-indigo-600', 'text-white', 'font-semibold', 'shadow', 'bg-amber-600'));
+                        // Add active class with appropriate color
+                        if (targetUserButtonsContainer.id === 'daily-user-buttons-container') {
+                            button.classList.add('bg-indigo-600', 'text-white', 'font-semibold', 'shadow');
+                        } else if (targetUserButtonsContainer.id === 'monthly-user-buttons-container') {
+                            button.classList.add('bg-amber-600', 'text-white', 'font-semibold', 'shadow');
+                        }
+                        
+                        localStorage.setItem(selectedUserLocalStorageKey, user);
+
+                        displayFunction(user);
+                        if (window.innerWidth < 1024) {
+                            if (targetUserButtonsContainer.id === 'daily-user-buttons-container') {
+                                closeDailySidebar();
+                            } else if (targetUserButtonsContainer.id === 'monthly-user-buttons-container') {
+                                closeMonthlySidebar();
+                            }
+                        }
+                    };
+                    targetUserButtonsContainer.appendChild(button);
+                });
+            } catch (error) {
+                targetUserButtonsContainer.innerHTML = `<p class="text-red-500">เกิดข้อผิดพลาดในการโหลดรายชื่อผู้ใช้: ${error.message}</p>`;
+            }
+        }
+        
+        // --- Display User Cards (Daily) ---
+        async function displayDailyUserCards(username) {
+            dailyUserInfo.classList.remove('hidden');
+            dailyWelcomeMessage.classList.add('hidden');
+            dailyCurrentUserHeader.textContent = `ข้อมูลของ: ${username}`;
+            dailyAppContainer.innerHTML = `<div class="loader-lg col-span-full mx-auto animate-spin rounded-full border-4 border-slate-200 border-t-indigo-500"></div>`;
+            try {
+                // Uses 'daily' script for loading settings
+                const result = await apiCall('loadSettings', { username }, 'daily');
+                cardConfigurations = Array.isArray(result.config) ? result.config : [];
+                renderDailyApp();
+            } catch (error) {
+                dailyAppContainer.innerHTML = `<p class="text-red-500 text-center col-span-full">เกิดข้อผิดพลาดในการโหลดการตั้งค่า: ${error.message}</p>`;
+                cardConfigurations = [];
+            }
+        }
+
+        async function checkDailySheetData(config, dateValue, resultsEl) {
+            if (config.sheetId === 'N/A') {
+                return renderDisabledMessage(resultsEl, 'ไม่มีใช้งานในสาขา', 'การ์ดนี้ถูกปิดการใช้งาน');
+            }
+            if (!config.sheetId) {
+                return renderInfoMessage(resultsEl, 'ยังไม่ได้ตั้งค่า Sheet ID', 'กรุณากำหนดค่าในหน้าตั้งค่า');
+            }
+            if (!config.sheetName) {
+                return renderInfoMessage(resultsEl, 'ยังไม่ได้ตั้งค่า Sheet Name', 'กรุณากำหนดค่าในหน้าตั้งค่า');
+            }
+
+            if (!dateValue) {
+                resultsEl.innerHTML = '<p class="text-slate-500">กรุณาเลือกวันที่</p>';
+                return;
+            }
+
+            resultsEl.innerHTML = `<div class="loader-sm mx-auto animate-spin rounded-full border-2 border-slate-300 border-t-indigo-500"></div>`;
+            const cacheKey = `${config.sheetId}-${dateValue}`;
+            if (dailyDataCache[cacheKey]) {
+                return processDailyData(dailyDataCache[cacheKey], resultsEl, config.targetCount);
+            }
+            try {
+                // Uses 'daily' script for getting daily sheet data
+                const filteredRows = await apiCall('getSheetData', { sheetId: config.sheetId, sheetName: config.sheetName, date: dateValue }, 'daily');
+                dailyDataCache[cacheKey] = filteredRows;
+                processDailyData(filteredRows, resultsEl, config.targetCount);
+            } catch (error) {
+                renderError(resultsEl, `เกิดข้อผิดพลาด: ${error.message}`);
+            }
+        }
+
+        function processDailyData(dataRows, resultsEl, targetCount) {
+             const dateString = new Date(dailyGlobalCheckDateInput.value).toLocaleDateString('th-TH', { dateStyle: 'long' });
+             renderDailyResults(resultsEl, dataRows, dateString, targetCount);
+        }
+
+        // --- Refresh Logic (Daily) ---
+        function refreshDailyCurrentView() {
+            const selectedButton = document.querySelector('#daily-user-buttons-container button.bg-indigo-600');
+            if (selectedButton) {
+                const username = selectedButton.textContent;
+                Object.keys(dailyDataCache).forEach(key => delete dailyDataCache[key]);
+                console.log('Daily cache cleared for refresh.');
+                const refreshIcon = dailyRefreshButton.querySelector('svg');
+                refreshIcon.classList.add('animate-spin');
+                dailyRefreshButton.disabled = true;
+                displayDailyUserCards(username).finally(() => {
+                    refreshIcon.classList.remove('animate-spin');
+                    dailyRefreshButton.disabled = false;
+                });
+            } else {
+                // Use a custom message box instead of alert
+                showCustomMessage('แจ้งเตือน', 'กรุณาเลือกผู้ใช้งานก่อนรีเฟรช');
+            }
+        }
+
+        // --- UI Rendering (Daily) ---
+        function renderDailyApp() {
+            dailyAppContainer.innerHTML = '';
+            if (cardConfigurations.length === 0) {
+                dailyAppContainer.innerHTML = '<p class="text-slate-500 text-center col-span-full">ผู้ใช้นี้ยังไม่มีการตั้งค่าการ์ด</p>';
+            } else {
+                cardConfigurations.forEach((config, index) => createDailyCard(config, index));
+            }
+        }
+
+        function createDailyCard(config, index) {
+            const resultsDivId = `daily-results-${index}`;
+            // Add data-config and data-date attributes for easy access in click handler
+            const cardHtml = `<div id="daily-card-${index}" class="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-xl p-6 md:p-8 cursor-pointer" 
+                                data-config-index="${index}" data-date="${dailyGlobalCheckDateInput.value}">
+                                <div class="text-center mb-4">
+                                    <h1 class="text-xl sm:text-2xl font-bold text-slate-800">${config.title}</h1>
+                                </div>
+                                <div id="${resultsDivId}" class="min-h-[150px] flex items-center justify-center transition-all"></div>
+                              </div>`;
+            dailyAppContainer.insertAdjacentHTML('beforeend', cardHtml);
+            
+            // Attach click listener to the newly created card
+            const cardElement = document.getElementById(`daily-card-${index}`);
+            cardElement.addEventListener('click', () => {
+                const selectedConfig = cardConfigurations[parseInt(cardElement.dataset.configIndex)];
+                const selectedDate = cardElement.dataset.date;
+                openDailyDetailPage(selectedConfig, selectedDate);
+            });
+
+            checkDailySheetData(config, dailyGlobalCheckDateInput.value, document.getElementById(resultsDivId));
+        }
+
+        function renderDailyResults(resultsEl, entries, date, targetCount) {
+            resultsEl.innerHTML = '';
+            const COL_USER_IDX = 7, COL_NUMBER_IDX = 9;
+            const uniqueNumbers = new Set(entries.map(entry => entry[COL_NUMBER_IDX]).filter(Boolean));
+            const uniqueUsers = new Set(entries.map(entry => entry[COL_USER_IDX]).filter(Boolean));
+            
+            let statusBlock, detailsBlock;
+            
+            if (entries.length === 0) {
+                 statusBlock = `<div class="flex flex-col items-center justify-center text-center text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-2 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg><p class="font-semibold text-slate-700">ไม่พบข้อมูลสำหรับวันที่ ${date}</p></div>`;
+                 detailsBlock = '';
+            } else {
+                if (uniqueNumbers.size >= targetCount) {
+                    statusBlock = `<div class="bg-teal-100/50 border border-teal-200/80 text-teal-800 p-4 rounded-xl flex items-center space-x-4"><div class="flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-10 h-10 text-teal-500"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg></div><div class="min-w-0"><p class="font-bold text-lg">ครบแล้ว</p><p class="text-sm break-words">ตรวจครบ ${uniqueNumbers.size} หมายเลขสำหรับวันที่ ${date}</p></div></div>`;
+                } else {
+                    const needed = targetCount - uniqueNumbers.size;
+                    statusBlock = `<div class="bg-amber-100/50 border border-amber-200/80 text-amber-800 p-4 rounded-xl flex items-center space-x-4"><div class="flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-10 h-10 text-amber-500"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg></div><div class="min-w-0"><p class="font-bold text-lg">ยังไม่ครบ (${uniqueNumbers.size}/${targetCount})</p><p class="text-sm break-words">ขาดอีก ${needed} หมายเลขสำหรับวันที่ ${date}</p></div></div>`;
+                }
+                detailsBlock = `<div class="space-y-4 pt-4 text-sm mt-4 border-t border-slate-200"><div class="flex items-start space-x-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 flex-shrink-0 text-slate-400 mt-0.5"><path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.095a1.23 1.23 0 00.41-1.412A9.995 9.995 0 0010 12c-2.31 0-4.438.784-6.131 2.095z" /></svg><div><p class="font-semibold text-slate-600">ผู้ลงข้อมูล:</p><p class="text-slate-800 break-words">${uniqueUsers.size > 0 ? [...uniqueUsers].join(', ') : 'ไม่พบ'}</p></div></div><div class="flex items-start space-x-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 flex-shrink-0 text-slate-400 mt-0.5"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5z" clip-rule="evenodd" /></svg><div><p class="font-semibold text-slate-600">หมายเลขที่ตรวจแล้ว (${uniqueNumbers.size} หมายเลข):</p><p class="text-slate-800 break-words">${uniqueNumbers.size > 0 ? [...uniqueNumbers].join(', ') : 'ไม่พบ'}</p></div></div></div>`;
+            }
+            resultsEl.innerHTML = `<div class="w-full">${statusBlock}${detailsBlock}</div>`;
+        }
+        
+        // --- Display User Cards (Monthly) ---
+        async function displayMonthlyUserCards(username) {
+            monthlyUserInfo.classList.remove('hidden');
+            monthlyWelcomeMessage.classList.add('hidden');
+            monthlyCurrentUserHeader.textContent = `ข้อมูลของ: ${username}`;
+            monthlyAppContainer.innerHTML = `<div class="loader-lg col-span-full mx-auto animate-spin rounded-full border-4 border-slate-200 border-t-amber-500"></div>`;
+            try {
+                // BUG FIX: Changed to use 'daily' script for loading settings.
+                // It's likely that the card configurations are stored in one central place (the daily script),
+                // while the monthly script is only for fetching the monthly data itself.
+                const result = await apiCall('loadSettings', { username }, 'daily'); 
+                cardConfigurations = Array.isArray(result.config) ? result.config : [];
+                renderMonthlyApp();
+            } catch (error) {
+                monthlyAppContainer.innerHTML = `<p class="text-red-500 text-center col-span-full">เกิดข้อผิดพลาดในการโหลดการตั้งค่า: ${error.message}</p>`;
+                cardConfigurations = [];
+            }
+        }
+
+        async function checkMonthlySheetData(config, monthYearValue, resultsEl) {
+            // Pass the config object to processMonthlyData
+            if (config.sheetId === 'N/A') {
+                return renderDisabledMessage(resultsEl, 'ไม่มีใช้งานในสาขา', 'การ์ดนี้ถูกปิดการใช้งาน');
+            }
+            if (!config.sheetId) {
+                return renderInfoMessage(resultsEl, 'ยังไม่ได้ตั้งค่า Sheet ID', 'กรุณากำหนดค่าในหน้าตั้งค่า');
+            }
+            if (!config.sheetName) {
+                return renderInfoMessage(resultsEl, 'ยังไม่ได้ตั้งค่า Sheet Name', 'กรุณากำหนดค่าในหน้าตั้งค่า');
+            }
+
+            if (!monthYearValue) {
+                resultsEl.innerHTML = '<p class="text-slate-500">กรุณาเลือกเดือน</p>';
+                return;
+            }
+
+            resultsEl.innerHTML = `<div class="loader-sm mx-auto animate-spin rounded-full border-2 border-slate-300 border-t-amber-500"></div>`;
+            const [year, month] = monthYearValue.split('-').map(Number);
+            const cacheKey = `${config.sheetId}-${year}-${month}`;
+
+            if (monthlyDataCache[cacheKey]) {
+                return processMonthlyData(monthlyDataCache[cacheKey], resultsEl, config.targetCount, year, month, config); // Pass config
+            }
+            try {
+                // Uses 'monthly' script for getting monthly sheet data
+                const allMonthlyData = await apiCall('getMonthlySheetData', { sheetId: config.sheetId, sheetName: config.sheetName, year, month }, 'monthly');
+                monthlyDataCache[cacheKey] = allMonthlyData.data; // Store the 'data' array from the response
+                processMonthlyData(allMonthlyData.data, resultsEl, config.targetCount, year, month, config); // Pass config
+            } catch (error) {
+                renderError(resultsEl, `เกิดข้อผิดพลาด: ${error.message}`);
+            }
+        }
+
+        function processMonthlyData(allMonthlyData, resultsEl, targetCount, year, month, config) { // Accept config
+            const daysInMonth = new Date(year, month, 0).getDate(); // Get number of days in the month
+            const dailyCompletionStatus = {}; // { day: true/false }
+            const COL_DAY_IDX = 1, COL_NUMBER_IDX = 9; // These indices are crucial and should match your Google Sheet data structure
+
+            // Initialize daily completion status
+            for (let i = 1; i <= daysInMonth; i++) {
+                dailyCompletionStatus[i] = false; // Assume incomplete
+            }
+
+            // Group data by day and check completion
+            const dailyNumbers = {}; // { day: Set<uniqueNumbers> }
+            allMonthlyData.forEach(row => {
+                try {
+                    const day = parseInt(row[COL_DAY_IDX], 10);
+                    const number = row[COL_NUMBER_IDX];
+                    if (!isNaN(day) && day >= 1 && day <= daysInMonth && number) {
+                        if (!dailyNumbers[day]) {
+                            dailyNumbers[day] = new Set();
+                        }
+                        dailyNumbers[day].add(number);
+                    }
+                } catch (e) {
+                    console.error("Error parsing row for monthly summary (client-side):", row, e);
+                }
+            });
+
+            let allDaysComplete = true;
+            for (let i = 1; i <= daysInMonth; i++) {
+                if (dailyNumbers[i] && dailyNumbers[i].size >= targetCount) {
+                    dailyCompletionStatus[i] = true;
+                } else {
+                    allDaysComplete = false; // If any day is incomplete, the whole month is incomplete
+                }
+            }
+            
+            renderMonthlyResults(resultsEl, allDaysComplete, year, month, dailyCompletionStatus, targetCount, config); // Pass config
+        }
+
+        // --- Refresh Logic (Monthly) ---
+        function refreshMonthlyCurrentView() {
+            const selectedButton = document.querySelector('#monthly-user-buttons-container button.bg-amber-600');
+            if (selectedButton) {
+                const username = selectedButton.textContent;
+                Object.keys(monthlyDataCache).forEach(key => delete monthlyDataCache[key]);
+                console.log('Monthly cache cleared for refresh.');
+                const refreshIcon = monthlyRefreshButton.querySelector('svg');
+                refreshIcon.classList.add('animate-spin');
+                monthlyRefreshButton.disabled = true;
+                displayMonthlyUserCards(username).finally(() => {
+                    refreshIcon.classList.remove('animate-spin');
+                    monthlyRefreshButton.disabled = false;
+                });
+            } else {
+                // Use a custom message box instead of alert
+                showCustomMessage('แจ้งเตือน', 'กรุณาเลือกผู้ใช้งานก่อนรีเฟรช');
+            }
+        }
+
+        // --- UI Rendering (Monthly) ---
+        function renderMonthlyApp() {
+            monthlyAppContainer.innerHTML = '';
+            if (cardConfigurations.length === 0) {
+                monthlyAppContainer.innerHTML = '<p class="text-slate-500 text-center col-span-full">ผู้ใช้นี้ยังไม่มีการตั้งค่าการ์ด</p>';
+            } else {
+                cardConfigurations.forEach((config, index) => createMonthlyCard(config, index));
+            }
+        }
+
+        function createMonthlyCard(config, index) {
+            const resultsDivId = `monthly-results-${index}`;
+            const cardHtml = `<div id="monthly-card-${index}" class="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-xl p-6 md:p-8"><div class="text-center mb-4"><h1 class="text-xl sm:text-2xl font-bold text-slate-800">${config.title}</h1></div><div id="${resultsDivId}" class="min-h-[150px] flex items-center justify-center transition-all"></div></div>`;
+            monthlyAppContainer.insertAdjacentHTML('beforeend', cardHtml);
+            checkMonthlySheetData(config, monthlyGlobalCheckMonthInput.value, document.getElementById(resultsDivId));
+        }
+
+        function renderMonthlyResults(resultsEl, allDaysComplete, year, month, dailyCompletionStatus, targetCount, config) { // Accept config
+            resultsEl.innerHTML = '';
+            const monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+            const monthName = monthNames[month - 1];
+            const buddhistYear = year + 543;
+
+            let statusBlock;
+
+            // Check for "แก๊ส LPG" card title for special status
+            if (config.title === 'แก๊ส LPG') {
+                statusBlock = `<div class="bg-blue-100/50 border border-blue-200/80 text-blue-800 p-4 rounded-xl flex items-center space-x-4"><div class="flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-blue-500"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg></div><div class="min-w-0"><p class="font-bold text-lg">สถานะพิเศษ</p><p class="text-sm break-words">กรุณาตรวจสอบทุกครั้งที่มีการนำถังแก๊สมาจัดเก็บในพื้นที่</p></div></div>`;
+            } else if (allDaysComplete) {
+                statusBlock = `<div class="bg-teal-100/50 border border-teal-200/80 text-teal-800 p-4 rounded-xl flex items-center space-x-4"><div class="flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-10 h-10 text-teal-500"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg></div><div class="min-w-0"><p class="font-bold text-lg">ครบแล้วทั้งเดือน</p><p class="text-sm break-words">ข้อมูลครบทุกวันสำหรับเดือน ${monthName} ${buddhistYear}</p></div></div>`;
+            } else {
+                statusBlock = `<div class="bg-amber-100/50 border border-amber-200/80 text-amber-800 p-4 rounded-xl flex items-center space-x-4"><div class="flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-10 h-10 text-amber-500"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg></div><div class="min-w-0"><p class="font-bold text-lg">ยังไม่ครบทั้งเดือน</p><p class="text-sm break-words">มีบางวันในเดือน ${monthName} ${buddhistYear} ที่ข้อมูลยังไม่ครบ (${targetCount} หมายเลข/วัน)</p></div></div>`;
+            }
+
+            const dailySummaryHtml = Object.entries(dailyCompletionStatus).map(([day, isComplete]) => `
+                <div class="flex items-center justify-between py-1 px-2 rounded-lg ${isComplete ? 'bg-teal-50 text-teal-800' : 'bg-rose-50 text-rose-800'}">
+                    <span class="font-medium">${day}</span>
+                    ${isComplete ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.052-.143z" clip-rule="evenodd" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94l-1.72-1.72z" clip-rule="evenodd" /></svg>'}
+                </div>
+            `).join('');
+
+            const detailsBlock = `<div class="space-y-2 pt-4 text-sm mt-4 border-t border-slate-200">
+                <p class="font-semibold text-slate-600 mb-2">สถานะรายวัน:</p>
+                <div class="grid grid-cols-4 gap-2 p-2 border border-slate-200 rounded-lg bg-slate-50">
+                    ${dailySummaryHtml}
+                </div>
+            </div>`;
+
+            resultsEl.innerHTML = `<div class="w-full">${statusBlock}${detailsBlock}</div>`;
+        }
+        
+        function renderError(resultsEl, msg) {
+            resultsEl.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl flex flex-col items-center justify-center text-center"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg><p class="font-bold">เกิดข้อผิดพลาด</p><p class="text-sm">${msg}</p></div>`;
+        }
+
+        function renderDisabledMessage(resultsEl, title, msg) {
+            resultsEl.innerHTML = `<div class="bg-slate-50 border border-slate-200 text-slate-800 p-4 rounded-xl flex flex-col items-center justify-center text-center"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-2 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg><p class="font-bold">${title}</p><p class="text-sm text-slate-600">${msg}</p></div>`;
+        }
+        
+        function renderInfoMessage(resultsEl, title, msg) {
+            resultsEl.innerHTML = `<div class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl flex flex-col items-center justify-center text-center"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-2 text-amber-400"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg><p class="font-bold">${title}</p><p class="text-sm text-amber-700">${msg}</p></div>`;
+        }
+
+        // --- Custom Message Box (Replaces alert) ---
+        function showCustomMessage(title, message) {
+            const modalHtml = `
+                <div id="custom-message-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
+                    <div class="bg-white rounded-lg shadow-xl w-full max-w-sm flex flex-col">
+                        <div class="flex justify-between items-center p-4 border-b border-slate-200">
+                            <h2 class="text-xl font-bold text-slate-800">${title}</h2>
+                            <button id="custom-message-close" class="text-slate-500 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="p-4 text-slate-700">
+                            <p>${message}</p>
+                        </div>
+                        <div class="p-4 border-t border-slate-200 flex justify-end">
+                            <button id="custom-message-ok" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                                ตกลง
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            document.body.classList.add('overflow-hidden');
+
+            const modal = document.getElementById('custom-message-modal');
+            const closeButton = document.getElementById('custom-message-close');
+            const okButton = document.getElementById('custom-message-ok');
+
+            const closeModal = () => {
+                modal.remove();
+                // Only remove overflow-hidden if no other modals/overlays are active
+                if (!document.querySelector('#daily-sidebar-overlay:not(.hidden)')) {
+                   document.body.classList.remove('overflow-hidden');
+                }
+            };
+
+            closeButton.addEventListener('click', closeModal);
+            okButton.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+        
+        // --- Initial Load & Event Listeners ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Service Worker
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./admin-sw.js')
+                        .then(registration => console.log('Admin ServiceWorker registration successful with scope: ', registration.scope))
+                        .catch(err => console.log('Admin ServiceWorker registration failed: ', err));
+                });
+            }
+            
+            // Menu Listeners
+            menuDailyCheck.addEventListener('click', async (e) => {
+                e.preventDefault();
+                showDailyApp();
+                dailyGlobalCheckDateInput.value = new Date().toISOString().split('T')[0];
+                await loadAllUsers(dailyUserButtonsContainer, 'lastSelectedUserDaily', displayDailyUserCards);
+                const lastSelectedUserDaily = localStorage.getItem('lastSelectedUserDaily');
+                if (lastSelectedUserDaily) {
+                    const userButton = [...document.querySelectorAll('#daily-user-buttons-container button')].find(btn => btn.textContent === lastSelectedUserDaily);
+                    if (userButton) {
+                        userButton.click();
+                    }
+                }
+            });
+
+            menuDetails.addEventListener('click', (e) => {
+                e.preventDefault();
+                showCustomMessage('แจ้งเตือน', 'เมนู "รายละเอียดการตรวจสอบ" ยังไม่พร้อมใช้งาน');
+            });
+
+            menuSummary.addEventListener('click', async (e) => {
+                e.preventDefault();
+                showMonthlyApp();
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = (today.getMonth() + 1).toString().padStart(2, '0');
+                monthlyGlobalCheckMonthInput.value = `${year}-${month}`;
+                await loadAllUsers(monthlyUserButtonsContainer, 'lastSelectedUserMonthly', displayMonthlyUserCards);
+                const lastSelectedUserMonthly = localStorage.getItem('lastSelectedUserMonthly');
+                if (lastSelectedUserMonthly) {
+                    const userButton = [...document.querySelectorAll('#monthly-user-buttons-container button')].find(btn => btn.textContent === lastSelectedUserMonthly);
+                    if (userButton) {
+                        userButton.click();
+                    }
+                }
+            });
+
+            menuOther.addEventListener('click', (e) => {
+                e.preventDefault();
+                showCustomMessage('แจ้งเตือน', 'เมนู "เมนูอื่นๆ" ยังไม่พร้อมใช้งาน');
+            });
+
+            // Daily App Listeners
+            dailyBackToMenuButton.addEventListener('click', showMainMenu);
+            dailySidebarToggle.addEventListener('click', (e) => { e.stopPropagation(); if (dailySidebar.classList.contains('-translate-x-full')) { openDailySidebar(); } else { closeDailySidebar(); } });
+            dailySidebarOverlay.addEventListener('click', closeDailySidebar);
+            
+            dailyGlobalCheckDateInput.addEventListener('change', () => {
+                const selectedButton = document.querySelector('#daily-user-buttons-container button.bg-indigo-600');
+                if (selectedButton) {
+                    Object.keys(dailyDataCache).forEach(key => delete dailyDataCache[key]);
+                    displayDailyUserCards(selectedButton.textContent);
+                }
+            });
+            dailyRefreshButton.addEventListener('click', refreshDailyCurrentView);
+            dailyUserSearchInput.addEventListener('input', () => {
+                const searchTerm = dailyUserSearchInput.value.toLowerCase();
+                const userButtons = document.querySelectorAll('#daily-user-buttons-container button');
+                userButtons.forEach(button => {
+                    const username = button.textContent.toLowerCase();
+                    if (username.includes(searchTerm)) {
+                        button.style.display = 'block';
+                    } else {
+                        button.style.display = 'none';
+                    }
+                });
+            });
+
+            // Monthly App Listeners
+            monthlyBackToMenuButton.addEventListener('click', showMainMenu);
+            monthlySidebarToggle.addEventListener('click', (e) => { e.stopPropagation(); if (monthlySidebar.classList.contains('-translate-x-full')) { openMonthlySidebar(); } else { closeMonthlySidebar(); } });
+            monthlySidebarOverlay.addEventListener('click', closeMonthlySidebar);
+
+            monthlyGlobalCheckMonthInput.addEventListener('change', () => {
+                const selectedButton = document.querySelector('#monthly-user-buttons-container button.bg-amber-600');
+                if (selectedButton) {
+                    Object.keys(monthlyDataCache).forEach(key => delete monthlyDataCache[key]);
+                    displayMonthlyUserCards(selectedButton.textContent);
+                }
+            });
+            monthlyRefreshButton.addEventListener('click', refreshMonthlyCurrentView);
+            monthlyUserSearchInput.addEventListener('input', () => {
+                const searchTerm = monthlyUserSearchInput.value.toLowerCase();
+                const userButtons = document.querySelectorAll('#monthly-user-buttons-container button');
+                userButtons.forEach(button => {
+                    const username = button.textContent.toLowerCase();
+                    if (username.includes(searchTerm)) {
+                        button.style.display = 'block';
+                    } else {
+                        button.style.display = 'none';
+                    }
+                });
+            });
+
+            // Daily Detail Page Listeners
+            detailPageBackButton.addEventListener('click', showDailyApp);
+        });
+    </script>
+</body>
+</html>
