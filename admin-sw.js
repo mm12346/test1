@@ -1,5 +1,5 @@
 // กำหนดชื่อแคชสำหรับ Service Worker
-const CACHE_NAME = 'checklog-admin-cache-v1';
+const CACHE_NAME = 'checklog-admin-cache-v2';
 
 // รายการไฟล์ที่ต้องการแคชล่วงหน้าเมื่อ Service Worker ถูกติดตั้ง
 const urlsToCache = [
