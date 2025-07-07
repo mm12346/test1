@@ -322,6 +322,10 @@
         const monthlyDataCache = {};
         const dataLabelsCache = {}; 
 
+        // ADDED: Global variables to store the currently selected user
+        let currentSelectedDailyUser = null;
+        let currentSelectedMonthlyUser = null;
+
         // --- DOM Elements (Daily Check) ---
         const dailyCheckAppContainer = document.getElementById('daily-check-app-container');
         const dailyUserButtonsContainer = document.getElementById('daily-user-buttons-container');
@@ -388,9 +392,13 @@
             dailyDetailPageContainer.classList.add('hidden');
             localStorage.removeItem('lastSelectedUserDaily');
             localStorage.removeItem('lastSelectedUserMonthly');
+            // Ensure all buttons lose their active state when returning to main menu
             document.querySelectorAll('button.bg-indigo-600, button.bg-amber-600').forEach(btn => {
                 btn.classList.remove('bg-indigo-600', 'text-white', 'font-semibold', 'shadow', 'bg-amber-600');
             });
+            // Reset global selected user variables
+            currentSelectedDailyUser = null;
+            currentSelectedMonthlyUser = null;
         }
         
         function showDailyDetailPage() {
@@ -579,8 +587,10 @@
                         document.querySelectorAll(`#${targetUserButtonsContainer.id} button`).forEach(btn => btn.classList.remove('bg-indigo-600', 'text-white', 'font-semibold', 'shadow', 'bg-amber-600'));
                         if (targetUserButtonsContainer.id === 'daily-user-buttons-container') {
                             button.classList.add('bg-indigo-600', 'text-white', 'font-semibold', 'shadow');
+                            currentSelectedDailyUser = user; // Set global variable
                         } else if (targetUserButtonsContainer.id === 'monthly-user-buttons-container') {
                             button.classList.add('bg-amber-600', 'text-white', 'font-semibold', 'shadow');
+                            currentSelectedMonthlyUser = user; // Set global variable
                         }
                         
                         localStorage.setItem(selectedUserLocalStorageKey, user);
@@ -653,15 +663,14 @@
 
         // --- Refresh Logic (Daily) ---
         function refreshDailyCurrentView() {
-            const selectedButton = document.querySelector('#daily-user-buttons-container button.bg-indigo-600');
-            if (selectedButton) {
-                const username = selectedButton.textContent;
+            // Use the global variable instead of querying the DOM
+            if (currentSelectedDailyUser) { 
                 Object.keys(dailyDataCache).forEach(key => delete dailyDataCache[key]);
                 console.log('Daily cache cleared for refresh.');
                 const refreshIcon = dailyRefreshButton.querySelector('svg');
                 refreshIcon.classList.add('animate-spin');
                 dailyRefreshButton.disabled = true;
-                displayDailyUserCards(username).finally(() => {
+                displayDailyUserCards(currentSelectedDailyUser).finally(() => {
                     refreshIcon.classList.remove('animate-spin');
                     dailyRefreshButton.disabled = false;
                 });
@@ -810,15 +819,14 @@
 
         // --- Refresh Logic (Monthly) ---
         function refreshMonthlyCurrentView() {
-            const selectedButton = document.querySelector('#monthly-user-buttons-container button.bg-amber-600');
-            if (selectedButton) {
-                const username = selectedButton.textContent;
+            // Use the global variable instead of querying the DOM
+            if (currentSelectedMonthlyUser) {
                 Object.keys(monthlyDataCache).forEach(key => delete monthlyDataCache[key]);
                 console.log('Monthly cache cleared for refresh.');
                 const refreshIcon = monthlyRefreshButton.querySelector('svg');
                 refreshIcon.classList.add('animate-spin');
                 monthlyRefreshButton.disabled = true;
-                displayMonthlyUserCards(username).finally(() => {
+                displayMonthlyUserCards(currentSelectedMonthlyUser).finally(() => {
                     refreshIcon.classList.remove('animate-spin');
                     monthlyRefreshButton.disabled = false;
                 });
@@ -981,13 +989,16 @@
                         statusText = 'ไม่ครบ';
                     } else if (statusText.includes('สถานะพิเศษ')) {
                         statusText = 'ตรวจสอบตามการใช้งาน';
-                    } else {
+                    } else if (statusText.includes('ไม่มีใช้งานในสาขา')) { 
+                        statusText = 'ไม่มีใช้งานในสาขา';
+                    }
+                    else {
                         statusText = 'ไม่มีข้อมูล';
                     }
 
                     dataToExport.push({
                         'ชื่อสาขา': branchName,
-                        'ชื่อการ์ด': cardName,
+                        'Check Sheets': cardName, // CHANGED: Changed column name here
                         'สถานะรายเดือน': statusText
                     });
                 }
@@ -1006,7 +1017,7 @@
             // Set column widths for better readability
             const colWidths = [
                 { wch: Math.max(...dataToExport.map(item => item['ชื่อสาขา'].length), 'ชื่อสาขา'.length) + 2 },
-                { wch: Math.max(...dataToExport.map(item => item['ชื่อการ์ด'].length), 'ชื่อการ์ด'.length) + 2 },
+                { wch: Math.max(...dataToExport.map(item => item['Check Sheets'].length), 'Check Sheets'.length) + 2 }, // CHANGED: Updated width calculation
                 { wch: Math.max(...dataToExport.map(item => item['สถานะรายเดือน'].length), 'สถานะรายเดือน'.length) + 2 }
             ];
             ws['!cols'] = colWidths;
@@ -1034,7 +1045,10 @@
                 const lastSelectedUserDaily = localStorage.getItem('lastSelectedUserDaily');
                 if (lastSelectedUserDaily) {
                     const userButton = [...document.querySelectorAll('#daily-user-buttons-container button')].find(btn => btn.textContent === lastSelectedUserDaily);
-                    if (userButton) userButton.click();
+                    if (userButton) {
+                        userButton.click();
+                        currentSelectedDailyUser = lastSelectedUserDaily; // Ensure global is set on initial load
+                    }
                 }
             });
 
@@ -1054,7 +1068,10 @@
                 const lastSelectedUserMonthly = localStorage.getItem('lastSelectedUserMonthly');
                 if (lastSelectedUserMonthly) {
                     const userButton = [...document.querySelectorAll('#monthly-user-buttons-container button')].find(btn => btn.textContent === lastSelectedUserMonthly);
-                    if (userButton) userButton.click();
+                    if (userButton) {
+                        userButton.click();
+                        currentSelectedMonthlyUser = lastSelectedMonthlyUser; // Ensure global is set on initial load
+                    }
                 }
             });
 
@@ -1069,10 +1086,12 @@
             dailySidebarOverlay.addEventListener('click', closeDailySidebar);
             
             dailyGlobalCheckDateInput.addEventListener('change', () => {
-                const selectedButton = document.querySelector('#daily-user-buttons-container button.bg-indigo-600');
-                if (selectedButton) {
+                // Use the global variable instead of querying the DOM
+                if (currentSelectedDailyUser) {
                     Object.keys(dailyDataCache).forEach(key => delete dailyDataCache[key]);
-                    displayDailyUserCards(selectedButton.textContent);
+                    displayDailyUserCards(currentSelectedDailyUser);
+                } else {
+                    showCustomMessage('แจ้งเตือน', 'กรุณาเลือกสาขาก่อนเปลี่ยนวันที่'); // Show message if no user selected
                 }
             });
             dailyRefreshButton.addEventListener('click', refreshDailyCurrentView);
@@ -1090,10 +1109,12 @@
             monthlyExportExcelButton.addEventListener('click', exportMonthlySummaryToExcel); // ADDED
 
             monthlyGlobalCheckMonthInput.addEventListener('change', () => {
-                const selectedButton = document.querySelector('#monthly-user-buttons-container button.bg-amber-600');
-                if (selectedButton) {
+                // Use the global variable instead of querying the DOM
+                if (currentSelectedMonthlyUser) {
                     Object.keys(monthlyDataCache).forEach(key => delete monthlyDataCache[key]);
-                    displayMonthlyUserCards(selectedButton.textContent);
+                    displayMonthlyUserCards(currentSelectedMonthlyUser);
+                } else {
+                    showCustomMessage('แจ้งเตือน', 'กรุณาเลือกสาขาก่อนเปลี่ยนเดือน'); // Show message if no user selected
                 }
             });
             monthlyRefreshButton.addEventListener('click', refreshMonthlyCurrentView);
