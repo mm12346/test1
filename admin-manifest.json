@@ -1,8 +1,8 @@
 {
     "name": "Check Log Admin",
     "short_name": "Check Log",
-    "description": "โปรแกรมติดตามการตรวจสอบอุปกรณ์ก่อนเริ่มงาน",
-    "start_url": "/index.html",
+    "description": "โปรแกรมติดตามการตรวจสอบอุปกรณ์",
+    "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#f1f5f9",
     "theme_color": "#f1f5f9",
@@ -25,4 +25,3 @@
         }
     ]
 }
-
