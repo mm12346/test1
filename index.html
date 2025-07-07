@@ -98,8 +98,8 @@
     <!-- Main Menu Page -->
     <div id="main-menu" class="flex flex-col items-center justify-center min-h-screen bg-slate-100 p-4">
         <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-indigo-600">Online Checker</h1>
-            <p class="text-slate-500 mt-2">โปรแกรมตรวจสอบข้อมูลออนไลน์</p>
+            <h1 class="text-4xl font-bold text-indigo-600">Check Log</h1>
+            <p class="text-slate-500 mt-2">โปรแกรมติดตามการตรวจสอบอุปกรณ์ก่อนเริ่มงาน</p>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-4xl">
             <!-- Menu Item 1: Daily Check -->
@@ -107,23 +107,23 @@
                 <div class="bg-indigo-100 text-indigo-600 rounded-full p-4 mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 </div>
-                <h2 class="text-xl font-semibold text-slate-800">ตรวจสอบรายวัน</h2>
-                <p class="text-sm text-slate-500 mt-1">เข้าสู่หน้าตรวจสอบข้อมูลประจำวัน</p>
+                <h2 class="text-xl font-semibold text-slate-800">Daily Check</h2>
+                <p class="text-sm text-slate-500 mt-1">สรุปสถานะการตรวจสอบรายวัน</p>
             </a>
             <!-- Menu Item 2: Summary -->
             <a href="#" id="menu-summary" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center">
                 <div class="bg-amber-100 text-amber-600 rounded-full p-4 mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
-                <h2 class="text-xl font-semibold text-slate-800">สรุปตรวจประจำเดือน</h2>
-                <p class="text-sm text-slate-500 mt-1">เข้าสู่หน้าสรุปข้อมูลประจำเดือน</p>
+                <h2 class="text-xl font-semibold text-slate-800">Month Check</h2>
+                <p class="text-sm text-slate-500 mt-1">สรุปสถานะการตรวจสอบรายเดือน</p>
             </a>
              <!-- Menu Item 3: Details -->
             <a href="#" id="menu-details" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center opacity-60 cursor-not-allowed">
                 <div class="bg-sky-100 text-sky-600 rounded-full p-4 mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
-                <h2 class="text-xl font-semibold text-slate-800">รายละเอียดการตรวจสอบ</h2>
+                <h2 class="text-xl font-semibold text-slate-800">เมนู3</h2>
                 <p class="text-sm text-slate-500 mt-1">เร็วๆ นี้</p>
             </a>
             <!-- Menu Item 4: Others -->
@@ -131,7 +131,7 @@
                 <div class="bg-slate-100 text-slate-600 rounded-full p-4 mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
                 </div>
-                <h2 class="text-xl font-semibold text-slate-800">เมนูอื่นๆ</h2>
+                <h2 class="text-xl font-semibold text-slate-800">เมนู4</h2>
                 <p class="text-sm text-slate-500 mt-1">เร็วๆ นี้</p>
             </a>
         </div>
@@ -217,7 +217,7 @@
         <aside id="monthly-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
             <div class="flex items-center justify-center p-4 border-b border-slate-200">
                  <svg class="w-8 h-8 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                 <h1 class="text-xl font-bold text-slate-800 ml-2">สรุปรายเดือน</h1>
+                 <h1 class="text-xl font-bold text-slate-800 ml-2">ตรวจสอบรายเดือน</h1>
             </div>
             <div class="p-4">
                 <h2 class="text-lg font-semibold text-slate-700 mb-4">เลือกสาขา</h2>
