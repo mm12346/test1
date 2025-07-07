@@ -1,6 +1,6 @@
 {
   "name": "Admin Dashboard - Online Checker",
-  "short_name": "Online Checker",
+  "short_name": "Checke Log",
   "description": "แดชบอร์ดสำหรับผู้ดูแลระบบเพื่อตรวจสอบข้อมูลผู้ใช้ทั้งหมด",
   "start_url": "./index.html",
   "display": "standalone",
