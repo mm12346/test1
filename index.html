@@ -9,12 +9,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="website icon" type="png" href="https://raw.githubusercontent.com/mm12346/test1/refs/heads/main/512.png">
+    <link rel="website icon" type="png" href="https://raw.githubusercontent.com/mm12346/checklog/refs/heads/main/512.png">
     
     <!-- PWA Manifest & Theme for Admin -->
     <link rel="manifest" href="admin-manifest.json">
     <meta name="theme-color" content="#f1f5f9"> <!-- Changed to match body background -->
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/mm12346/test1/refs/heads/main/180.png">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/mm12346/checklog/refs/heads/main/180.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Check Log">
@@ -645,20 +645,24 @@
             resultsEl.innerHTML = `<div class="loader-sm mx-auto animate-spin rounded-full border-2 border-slate-300 border-t-indigo-500"></div>`;
             const cacheKey = `${config.sheetId}-${dateValue}`;
             if (dailyDataCache[cacheKey]) {
-                return processDailyData(dailyDataCache[cacheKey], resultsEl, config.targetCount);
+                // MODIFIED: Pass the full config object
+                return processDailyData(dailyDataCache[cacheKey], resultsEl, config);
             }
             try {
                 const filteredRows = await apiCall('getSheetData', { sheetId: config.sheetId, sheetName: config.sheetName, date: dateValue }, 'daily');
                 dailyDataCache[cacheKey] = filteredRows;
-                processDailyData(filteredRows, resultsEl, config.targetCount);
+                // MODIFIED: Pass the full config object
+                processDailyData(filteredRows, resultsEl, config);
             } catch (error) {
                 renderError(resultsEl, `เกิดข้อผิดพลาด: ${error.message}`);
             }
         }
 
-        function processDailyData(dataRows, resultsEl, targetCount) {
+        // MODIFIED: Function signature changed to accept the full config object
+        function processDailyData(dataRows, resultsEl, config) {
              const dateString = new Date(dailyGlobalCheckDateInput.value).toLocaleDateString('th-TH', { dateStyle: 'long' });
-             renderDailyResults(resultsEl, dataRows, dateString, targetCount);
+             // MODIFIED: Pass the full config object to the rendering function
+             renderDailyResults(resultsEl, dataRows, dateString, config);
         }
 
         // --- Refresh Logic (Daily) ---
@@ -710,18 +714,47 @@
             checkDailySheetData(config, dailyGlobalCheckDateInput.value, document.getElementById(resultsDivId));
         }
 
-        function renderDailyResults(resultsEl, entries, date, targetCount) {
+        // MODIFIED: This function now implements the requested logic for daily cards.
+        function renderDailyResults(resultsEl, entries, date, config) {
             resultsEl.innerHTML = '';
+            const { targetCount, title } = config; // Get title and targetCount from config
             const COL_USER_IDX = 7, COL_NUMBER_IDX = 9;
             const uniqueNumbers = new Set(entries.map(entry => entry[COL_NUMBER_IDX]).filter(Boolean));
             const uniqueUsers = new Set(entries.map(entry => entry[COL_USER_IDX]).filter(Boolean));
             
             let statusBlock, detailsBlock;
-            
-            if (entries.length === 0) {
-                 statusBlock = `<div class="flex flex-col items-center justify-center text-center text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-2 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg><p class="font-semibold text-slate-700">ไม่พบข้อมูลสำหรับวันที่ ${date}</p></div>`;
-                 detailsBlock = '';
+
+            // Special case for "แก๊ส LPG"
+            if (title === 'แก๊ส LPG') {
+                statusBlock = `<div class="bg-blue-100/50 border border-blue-200/80 text-blue-800 p-4 rounded-xl flex items-center space-x-4">
+                    <div class="flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-blue-500">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-bold text-lg">สถานะพิเศษ</p>
+                        <p class="text-sm break-words">ควรตรวจสอบทุกครั้งก่อนการจัดเก็บเข้าพื้นที่จัดเก็บ</p>
+                    </div>
+                </div>`;
+                detailsBlock = ''; // No details for this special case
+            } else if (entries.length === 0) {
+                // Case for no data found (for other cards) as per user request
+                const needed = targetCount; // All are needed
+                statusBlock = `<div class="bg-amber-100/50 border border-amber-200/80 text-amber-800 p-4 rounded-xl flex items-center space-x-4">
+                    <div class="flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-10 h-10 text-amber-500">
+                            <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-bold text-lg">ยังไม่ครบ (0/${targetCount})</p>
+                        <p class="text-sm break-words">ขาดอีก ${needed} หมายเลขสำหรับวันที่ ${date}</p>
+                    </div>
+                </div>`;
+                detailsBlock = ''; // No details block if no entries
             } else {
+                // Existing logic for when there are entries
                 if (uniqueNumbers.size >= targetCount) {
                     statusBlock = `<div class="bg-teal-100/50 border border-teal-200/80 text-teal-800 p-4 rounded-xl flex items-center space-x-4"><div class="flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-10 h-10 text-teal-500"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg></div><div class="min-w-0"><p class="font-bold text-lg">ครบแล้ว</p><p class="text-sm break-words">ตรวจครบ ${uniqueNumbers.size} หมายเลขสำหรับวันที่ ${date}</p></div></div>`;
                 } else {
@@ -1073,7 +1106,7 @@
                     const userButton = [...document.querySelectorAll('#monthly-user-buttons-container button')].find(btn => btn.textContent === lastSelectedUserMonthly);
                     if (userButton) {
                         userButton.click();
-                        currentSelectedMonthlyUser = lastSelectedMonthlyUser; // Ensure global is set on initial load
+                        currentSelectedMonthlyUser = lastSelectedUserMonthly; // Ensure global is set on initial load
                     }
                 }
             });
