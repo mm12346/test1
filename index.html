@@ -14,7 +14,6 @@
     <!-- PWA Manifest & Theme for Admin -->
     <link rel="manifest" href="admin-manifest.json">
     <meta name="theme-color" content="#f1f5f9"> <!-- Changed to match body background -->
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/mm12346/checklog/refs/heads/main/180.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Check Log">
@@ -120,6 +119,9 @@
             </a>
             <!-- Menu Item 3: Details (Removed as per user request) -->
             <!-- Menu Item 4: Others (Removed as per user request) -->
+        </div><br>
+        <div class="text-center mb-12">
+         <p class="text-sm text-slate-400 mt-1"> V 2.0</p>
         </div>
     </div>
 
@@ -188,7 +190,7 @@
                         </div>
                     </div>
                      <div id="daily-welcome-message" class="text-center py-12">
-                        <svg class="w-16 h-16 mx-auto text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                        <svg class="w-16 h-16 mx-auto text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 017.5 0ZM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
                         <h2 class="mt-4 text-2xl font-semibold text-slate-700">ยินดีต้อนรับ</h2>
                         <p class="mt-2 text-slate-500">กรุณาเลือกผู้ใช้งานจากเมนูด้านข้างเพื่อดูข้อมูล</p>
                     </div>
@@ -241,7 +243,7 @@
                         <div class="flex-grow flex items-center justify-end gap-2 sm:gap-4">
                             <input type="month" id="monthly-global-check-month" class="w-full max-w-xs px-4 py-2 bg-slate-100 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 transition">
                             <button id="monthly-refresh-button" title="รีเฟรชข้อมูล" class="p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-700 rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed">
-                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M3 12a9 9 0 0 1 9-9 9.75 9 0 0 1 6.74 2.74L21 8"></path>
                                     <path d="M21 3v5h-5"></path>
                                     <path d="M21 12a9 9 0 0 1-9 9 9.75 9 0 0 1-6.74-2.74L3 16"></path>
@@ -268,7 +270,7 @@
                         </div>
                     </div>
                      <div id="monthly-welcome-message" class="text-center py-12">
-                        <svg class="w-16 h-16 mx-auto text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                        <svg class="w-16 h-16 mx-auto text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 017.5 0ZM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
                         <h2 class="mt-4 text-2xl font-semibold text-slate-700">ยินดีต้อนรับ</h2>
                         <p class="mt-2 text-slate-500">กรุณาเลือกผู้ใช้งานจากเมนูด้านข้างเพื่อดูข้อมูล</p>
                     </div>
@@ -306,11 +308,21 @@
     <script>
         // --- Configuration ---
         const SCRIPT_URLS = [
-            'https://script.google.com/macros/s/AKfycbwZX0ywhNK28ZFXHNgEb9cYhl2IMtQpznVP4qykO1ptJorqNMrfDw-SSzYQjHUCQQ/exec'//API_2 (Daily)
+            'https://script.google.com/macros/s/AKfycbzaukac9i4eXChJdU51UiqgXWHZ1BAZvxc1uwMl-63fYDfwavE636zRBlhZhrxpqP1x/exec',//API_5 (Daily)
+            'https://script.google.com/macros/s/AKfycbwZX0ywhNK28ZFXHNgEb9cYhl2IMtQpznVP4qykO1ptJorqNMrfDw-SSzYQjHUCQQ/exec',//API_2 (Daily)
+            'https://script.google.com/macros/s/AKfycbwsKgINhyiziRXNHyLVGjox-AoOYn4n1Iwz0vnLrX0tK26YGLGT0UOfzJfBU1fGbAlf/exec',//API_1 (Daily)
+            'https://script.google.com/macros/s/AKfycbweG-pW-j5DQJc2Bf27zE-l6xpdnZS_z19MqClc0-POdxoKtwH_hbA86NjkKpnk6Zgp/exec',//API_3 (Daily)
+            'https://script.google.com/macros/s/AKfycbxgPHFAoISxt0bzwY9JjwhJShKT7IuHy3qCrLjl5xqXKIB8y1pQazaTIm0EKhw7xHW/exec'//API_4 (Daily)
         ];
 
         const MONTHLY_SCRIPT_URLS = [
+            'https://script.google.com/macros/s/AKfycbxeqQDZMAPu7xuQkwFAU_rsVY4r_ttS_QVSISA9HFoLZSB97NKXeOdSZoxAkIotZTdf/exec',//API_8(Monthly)
+            'https://script.google.com/macros/s/AKfycbzy25HmhhLEg_-rOKr4K2VHSMkSvtDZ4uyk18ZB9oNFj1h9CK7K90Z35Vwn3qfzYjsGMg/exec',//API_3 (Monthly)
+            'https://script.google.com/macros/s/AKfycbwiAjQUEiRzV7owrChPpTohvDBBdXFidYSIXKmb4BbDNkxkWPWLsQlvOAxydlK5G4aEeg/exec',//API_4 (Monthly)
+            'https://script.google.com/macros/s/AKfycbxtF4WXCYX5DSfT-cUvmrg90wAJara-EwMop3aBRbxZbk4Y__eLDCd5uLvZN0PvlRVL/exec',//API_5 (Monthly)
+            'https://script.google.com/macros/s/AKfycbyEU8sYHITnEwUjxdKeIgybiCQ2dJOra0yCGf9KmN-Lk1ZnQN5M4q4irBViddXEHsPl/exec',//API_6 (Monthly)
             'https://script.google.com/macros/s/AKfycbxjQuyZh8cdGxWJOiWwilcRBoVR3YJLtGXLxXR4ULod54d5UIHwB6tBYZ57iJxGkkrF/exec'//API_7 (Monthly)
+            
         ];
 
         let cardConfigurations = [];
@@ -386,15 +398,10 @@
             dailyCheckAppContainer.classList.add('hidden');
             monthlySummaryAppContainer.classList.add('hidden');
             dailyDetailPageContainer.classList.add('hidden');
-            localStorage.removeItem('lastSelectedUserDaily');
-            localStorage.removeItem('lastSelectedUserMonthly');
             // Ensure all buttons lose their active state when returning to main menu
             document.querySelectorAll('button.bg-indigo-600, button.bg-amber-600').forEach(btn => {
                 btn.classList.remove('bg-indigo-600', 'text-white', 'font-semibold', 'shadow', 'bg-amber-600');
             });
-            // Reset global selected user variables
-            currentSelectedDailyUser = null;
-            currentSelectedMonthlyUser = null;
         }
         
         function showDailyDetailPage() {
@@ -496,8 +503,27 @@
                 let additionalDataHtml = '';
                 for (let i = 10; i < row.length; i++) {
                     const dataLabel = customLabels[i - 10] || `ข้อมูล ${i - 9}`; 
-                    const dataValue = row[i] !== undefined && row[i] !== null ? row[i] : '';
+                    let dataValue = row[i] !== undefined && row[i] !== null ? row[i] : '';
                     
+                    // MODIFIED: Date formatting logic to use short date format (DD/MM/YYYY)
+                    if (typeof dataValue === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(dataValue)) {
+                        try {
+                            const dateObj = new Date(dataValue);
+                            if (!isNaN(dateObj.getTime())) { // Check if date is valid
+                                // Format to "DD/MM/YYYY" (Thai Buddhist year)
+                                dataValue = dateObj.toLocaleDateString('th-TH', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric' // This will give the Buddhist year in th-TH locale
+                                });
+                            }
+                        } catch (e) {
+                            console.error("Error parsing date string:", dataValue, e);
+                            // Fallback to original dataValue if parsing fails
+                        }
+                    }
+                    // END MODIFIED
+
                     let valueColorClass = 'text-slate-800';
                     if (typeof dataValue === 'string') {
                         if (dataValue.toLowerCase() === 'ปกติ') {
@@ -535,9 +561,15 @@
             const isGet = action.startsWith('load') || action.startsWith('get') || action.startsWith('getDataLabelsForCard');
             const options = { method: isGet ? 'GET' : 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' } };
             
-            const urlsToTry = scriptType === 'daily' ? SCRIPT_URLS : MONTHLY_SCRIPT_URLS;
+            const urls = scriptType === 'daily' ? [...SCRIPT_URLS] : [...MONTHLY_SCRIPT_URLS]; // Create a mutable copy
+
+            // Shuffle the URLs to try them in random order
+            for (let i = urls.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [urls[i], urls[j]] = [urls[j], urls[i]]; // ES6 swap
+            }
             
-            for (const baseUrl of urlsToTry) {
+            for (const baseUrl of urls) {
                 const url = new URL(baseUrl);
                 console.log(`Attempting API call to (${scriptType}): ${url.toString()} with action: ${action}`);
 
@@ -571,6 +603,11 @@
         // --- User Loading (Shared for Daily and Monthly) ---
         async function loadAllUsers(targetUserButtonsContainer, selectedUserLocalStorageKey, displayFunction) {
             targetUserButtonsContainer.innerHTML = `<div class="loader-sm animate-spin rounded-full border-2 border-slate-300 border-t-indigo-500 mx-auto"></div>`;
+            
+            // Disable search input while loading
+            const searchInput = targetUserButtonsContainer === dailyUserButtonsContainer ? dailyUserSearchInput : monthlyUserSearchInput;
+            searchInput.disabled = true;
+
             try {
                 const result = await apiCall('getAllUsers', {}, 'daily'); 
                 const users = result.users || [];
@@ -604,6 +641,9 @@
                 });
             } catch (error) {
                 targetUserButtonsContainer.innerHTML = `<p class="text-red-500">เกิดข้อผิดพลาดในการโหลดรายชื่อผู้ใช้: ${error.message}</p>`;
+            } finally {
+                // Enable search input after loading (or error)
+                searchInput.disabled = false;
             }
         }
         
@@ -720,23 +760,29 @@
             
             let statusBlock, detailsBlock;
 
-            // Special case for "แก๊ส LPG"
             if (title === 'แก๊ส LPG') {
-                statusBlock = `<div class="bg-blue-100/50 border border-blue-200/80 text-blue-800 p-4 rounded-xl flex items-center space-x-4">
-                    <div class="flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-blue-500">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                        </svg>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="font-bold text-lg">สถานะพิเศษ</p>
-                        <p class="text-sm break-words">ควรตรวจสอบทุกครั้งก่อนการจัดเก็บเข้าพื้นที่จัดเก็บ</p>
-                    </div>
-                </div>`;
+                // Special handling for "แก๊ส LPG" card
+                if (uniqueNumbers.size >= targetCount) {
+                    // If data is found and meets target count, show "ครบแล้ว"
+                    statusBlock = `<div class="bg-teal-100/50 border border-teal-200/80 text-teal-800 p-4 rounded-xl flex items-center space-x-4"><div class="flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-10 h-10 text-teal-500"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg></div><div class="min-w-0"><p class="font-bold text-lg">ครบแล้ว</p><p class="text-sm break-words">ตรวจครบ ${uniqueNumbers.size} หมายเลขสำหรับวันที่ ${date}</p></div></div>`;
+                } else {
+                    // If no data or not enough data, show "สถานะพิเศษ"
+                    statusBlock = `<div class="bg-blue-100/50 border border-blue-200/80 text-blue-800 p-4 rounded-xl flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-blue-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-bold text-lg">สถานะพิเศษ</p>
+                            <p class="text-sm break-words">ควรตรวจสอบทุกครั้งก่อนการจัดเก็บเข้าพื้นที่จัดเก็บ</p>
+                        </div>
+                    </div>`;
+                }
                 detailsBlock = ''; // No details for this special case
             } else if (entries.length === 0) {
-                // Case for no data found (for other cards) as per user request
-                const needed = targetCount; // All are needed
+                // Case for no data found (for other cards)
+                const needed = targetCount;
                 statusBlock = `<div class="bg-amber-100/50 border border-amber-200/80 text-amber-800 p-4 rounded-xl flex items-center space-x-4">
                     <div class="flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-10 h-10 text-amber-500">
@@ -750,7 +796,7 @@
                 </div>`;
                 detailsBlock = ''; // No details block if no entries
             } else {
-                // Existing logic for when there are entries
+                // Existing logic for when there are entries and it's not "แก๊ส LPG"
                 if (uniqueNumbers.size >= targetCount) {
                     statusBlock = `<div class="bg-teal-100/50 border border-teal-200/80 text-teal-800 p-4 rounded-xl flex items-center space-x-4"><div class="flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-10 h-10 text-teal-500"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg></div><div class="min-w-0"><p class="font-bold text-lg">ครบแล้ว</p><p class="text-sm break-words">ตรวจครบ ${uniqueNumbers.size} หมายเลขสำหรับวันที่ ${date}</p></div></div>`;
                 } else {
@@ -1072,7 +1118,8 @@
             menuDailyCheck.addEventListener('click', async (e) => {
                 e.preventDefault();
                 showDailyApp();
-                dailyGlobalCheckDateInput.value = new Date().toISOString().split('T')[0];
+                // Set daily date input to current date automatically
+                dailyGlobalCheckDateInput.value = new Date().toISOString().split('T')[0]; 
                 await loadAllUsers(dailyUserButtonsContainer, 'lastSelectedUserDaily', displayDailyUserCards);
                 const lastSelectedUserDaily = localStorage.getItem('lastSelectedUserDaily');
                 if (lastSelectedUserDaily) {
