@@ -123,21 +123,21 @@
                 font-size: 10pt; /* Adjust font size for print */
                 width: 100%;
             }
-            .bg-green-100 {
-                background-color: #d1fae5 !important;
+            .bg-emerald-50 {
+                background-color: #ecfdf5 !important;
                 -webkit-print-color-adjust: exact; /* For Chrome */
                 color-adjust: exact; /* Standard */
             }
-            .bg-red-100 {
-                 background-color: #fee2e2 !important;
+            .bg-rose-50 {
+                 background-color: #fff1f2 !important;
                 -webkit-print-color-adjust: exact;
                 color-adjust: exact;
             }
-            .text-green-800 {
+            .text-emerald-800 {
                 color: #065f46 !important;
             }
-            .text-red-800 {
-                color: #991b1b !important;
+            .text-rose-800 {
+                color: #9f1239 !important;
             }
             .no-print {
                 display: none !important;
@@ -391,6 +391,10 @@
         </header>
         <main>
             <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 bg-white rounded-2xl shadow-lg">
+                <!-- Search Input -->
+                <div class="mb-6 no-print">
+                    <input type="text" id="branch-summary-search-input" placeholder="ค้นหาชื่อสาขา..." class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-shadow shadow-sm hover:shadow-md focus:shadow-lg outline-none">
+                </div>
                 <h2 class="text-xl font-bold text-indigo-600 mb-4 text-center" id="summary-month-display">กำลังโหลด...</h2>
                 <div id="summary-table-container" class="overflow-x-auto">
                     <!-- Table will be inserted here by JavaScript -->
@@ -533,13 +537,49 @@
             document.body.classList.remove('overflow-hidden');
         }
 
-        // --- Monthly Branch Summary Logic ---
+        // --- NEW: Search function for Branch Summary Table ---
+        function filterBranchSummaryTable() {
+            const input = document.getElementById('branch-summary-search-input');
+            const filter = input.value.toUpperCase();
+            const tableContainer = document.getElementById('summary-table-container');
+            const table = tableContainer.querySelector('table');
+            if (!table) return;
+
+            const rows = table.getElementsByTagName('tr');
+
+            // Loop through all table body rows, and hide those that don't match the search query
+            for (let i = 1; i < rows.length; i++) { // Start at 1 to skip the header row
+                // The first cell of each row is the branch name, which is a <th>
+                const th = rows[i].getElementsByTagName('th')[0];
+                if (th) {
+                    const txtValue = th.textContent || th.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+
+        // --- Monthly Branch Summary Logic (MODIFIED) ---
         async function loadMonthlyBranchSummary() {
             showPage('monthly-branch-summary-container');
             const buddhistYear = new Date().getFullYear() + 543;
+
+            // Thai month mapping
+            const thaiMonths = {
+                "1": "มกราคม", "2": "กุมภาพันธ์", "3": "มีนาคม", "4": "เมษายน",
+                "5": "พฤษภาคม", "6": "มิถุนายน", "7": "กรกฎาคม", "8": "สิงหาคม",
+                "9": "กันยายน", "10": "ตุลาคม", "11": "พฤศจิกายน", "12": "ธันวาคม"
+            };
             
             summaryMonthDisplay.textContent = `รายงานสรุปผลข้อมูลการดำเนินการตรวจสอบอุปกรณ์ก่อนเริ่มงาน Daily Check Sheet ประจำเดือน... พ.ศ. ${buddhistYear}`;
             summaryTableContainer.innerHTML = `<div class="flex justify-center items-center p-10"><div class="loader-lg mx-auto animate-spin rounded-full border-4 border-slate-200 border-t-emerald-500"></div></div>`;
+            
+            // Clear previous search
+            const searchInput = document.getElementById('branch-summary-search-input');
+            if (searchInput) searchInput.value = '';
 
             try {
                 const res = await fetch(MONTHLY_BRANCH_SUMMARY_API_URL);
@@ -551,7 +591,10 @@
                     throw new Error(result.error);
                 }
                 
-                const monthName = result.month || '(ไม่ระบุเดือน)';
+                // Convert month number to Thai month name
+                const monthNumber = result.month ? String(result.month) : null;
+                const monthName = monthNumber ? (thaiMonths[monthNumber] || `เดือน ${monthNumber}`) : '(ไม่ระบุเดือน)';
+                
                 summaryMonthDisplay.textContent = `รายงานสรุปผลข้อมูลการดำเนินการตรวจสอบอุปกรณ์ก่อนเริ่มงาน Daily Check Sheet ประจำเดือน ${monthName} พ.ศ. ${buddhistYear}`;
                 
                 renderSummaryTable(result.headers, result.data);
@@ -562,7 +605,7 @@
             }
         }
 
-        // --- Standard Table Rendering Logic (MODIFIED) ---
+        // --- MODIFIED: Table Rendering Logic with new colors ---
         function renderSummaryTable(headers, data) {
             if (!headers || !data) {
                 summaryTableContainer.innerHTML = `<p class="text-slate-500 text-center">ไม่พบข้อมูลที่จะแสดง</p>`;
@@ -570,17 +613,16 @@
             }
 
             const table = document.createElement('table');
-            // min-w-full allows the table to be responsive. The parent container with overflow-x-auto handles scrolling on small screens.
-            table.className = 'min-w-full divide-y divide-slate-200 border border-slate-200';
+            // Use horizontal dividers for a cleaner look
+            table.className = 'min-w-full divide-y divide-slate-200';
 
             const thead = document.createElement('thead');
-            thead.className = 'bg-slate-50';
+            thead.className = 'bg-slate-100';
             let headerRowHtml = '<tr>';
             headers.forEach((header, index) => {
-                // First header left-aligned, others centered.
                 const alignClass = index === 0 ? 'text-left' : 'text-center';
-                // Allow header text to wrap if needed.
-                headerRowHtml += `<th scope="col" class="px-4 py-3 ${alignClass} text-xs font-medium text-slate-500 uppercase tracking-wider whitespace-normal">${header}</th>`;
+                // Styling for header text
+                headerRowHtml += `<th scope="col" class="px-6 py-3 ${alignClass} text-0 font-medium text-slate-600 uppercase tracking-wider">${header}</th>`;
             });
             headerRowHtml += '</tr>';
             thead.innerHTML = headerRowHtml;
@@ -589,27 +631,32 @@
             tbody.className = 'bg-white divide-y divide-slate-200';
             let bodyHtml = '';
             data.forEach(row => {
-                bodyHtml += '<tr class="hover:bg-slate-50">';
+                // Add hover effect to rows
+                bodyHtml += '<tr class="hover:bg-slate-50 transition-colors duration-200">';
                 row.forEach((cell, index) => {
                     let cellContent = cell;
-                    // First cell left-aligned, others centered.
-                    // Removed whitespace-nowrap to allow content wrapping
-                    let cellClass = index === 0 
-                        ? 'px-4 py-4 whitespace-normal text-sm font-medium text-slate-800 text-left'
-                        : 'px-4 py-4 text-sm text-center';
+                    // Base styling for all cells
+                    let cellClass = 'px-6 py-4 whitespace-nowrap text-sm';
 
+                    if (index === 0) {
+                        // Styling for the branch name (row header)
+                        cellClass += ' font-medium text-slate-900 text-left';
+                    } else {
+                        cellClass += ' text-center';
+                    }
+
+                    // Conditional styling based on cell content
                     if (cell === 'ครบ') {
-                        cellClass += ' bg-green-100 text-green-800 font-semibold';
+                        cellClass += ' text-emerald-800 bg-emerald-50 font-semibold';
                     } else if (cell === 'ไม่ครบ') {
-                        cellClass += ' bg-red-100 text-red-800 font-semibold';
+                        cellClass += ' text-rose-800 bg-rose-50 font-semibold';
                     } else if (cell === 'N/A') {
-                        cellContent = 'ไม่มีใช้งานในสาขา';
-                        cellClass += ' text-slate-500';
+                        cellContent = 'ไม่มีใช้งาน';
+                        cellClass += ' text-slate-400 italic';
                     } else if (index > 0) {
-                         cellClass += ' text-slate-700';
+                         cellClass += ' text-slate-600';
                     }
                     
-                    // Use <th> for the first cell in each row for semantic correctness (row header)
                     if (index === 0) {
                          bodyHtml += `<th scope="row" class="${cellClass}">${cellContent}</th>`;
                     } else {
@@ -1312,7 +1359,7 @@
                     const userButton = [...document.querySelectorAll('#daily-user-buttons-container button')].find(btn => btn.textContent === lastSelectedUserDaily);
                     if (userButton) {
                         userButton.click();
-                        currentSelectedDailyUser = lastSelectedUserDaily; 
+                        currentSelectedUserDaily = lastSelectedUserDaily; 
                     }
                 }
             });
@@ -1390,6 +1437,12 @@
             // New Summary Page Listener
             summaryBackToMenuButton.addEventListener('click', showMainMenu);
             summaryPrintPdfButton.addEventListener('click', printSummaryToPDF);
+
+            // Add listener for the new search input
+            const branchSearchInput = document.getElementById('branch-summary-search-input');
+            if (branchSearchInput) {
+                branchSearchInput.addEventListener('keyup', filterBranchSummaryTable);
+            }
         });
     </script>
 </body>
